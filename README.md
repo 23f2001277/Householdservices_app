@@ -1,2 +1,2 @@
 # Householdservices_app
-step 1 : install git on windows
+This is a Household services app developed by Ayush Das
