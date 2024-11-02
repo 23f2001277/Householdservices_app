@@ -1,7 +1,7 @@
 *{
     margin: 0;
     padding: 0;
-    background-color: rgb(230, 239, 247);
+    background-color: rgb(224, 231, 238);
     
 }
 .my_container{
@@ -16,7 +16,7 @@
 }
 .input_form{
     border: 1px solid rgb(16, 16, 47);
-    width: 600px;
+    width: auto;
     height: auto;
     margin: auto;
     margin-top: 20px;
@@ -29,4 +29,7 @@
     text-align: center;
     margin: auto;
     color: rgb(5,5,110);
+}
+.col{
+    font-size: 20px;
 }
