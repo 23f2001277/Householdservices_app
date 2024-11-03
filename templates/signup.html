@@ -15,27 +15,28 @@
             <div class="input_form">
                 <div class="mb-3">
                     <label for="user_name" class="form-label">Email ID (Username)</label>
-                    <input type="email" class="form-control" id="user_name" placeholder="">
+                    <input type="email" class="form-control" name="user_name" id="user_name" placeholder="">
                   </div>
                   <div class="mb-3">
                     <label for="exampleFormControlTextarea1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="" required></textarea>
+                    <input type="password" class="form-control" name="password" id="password" placeholder=""></textarea>
                   </div>
                   <div class="mb-3">
                     <label for="full_name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="full_name" placeholder=""></textarea>
+                    <input type="text" class="form-control" name="full_name" id="full_name" placeholder=""></textarea>
                   </div>
                   <div class="mb-3">
                     <label for="location" class="form-label">Location</label>
-                    <input type="text" class="form-control" id="location" placeholder=""></textarea>
+                    <input type="text" class="form-control" name="location" id="location" placeholder=""></textarea>
                   </div>
                   <div class="mb-3">
                     <label for="pin_code" class="form-label">Pin Code</label>
-                    <input type="text" class="form-control" id="pin_code" placeholder=""></textarea>
+                    <input type="text" class="form-control" name="pin_code" id="pin_code" placeholder=""></textarea>
                   </div>
                   <div class="mb-3">
-                    <button type="button" class="btn btn-secondary">Register</button>
-                    <p>Existing User? <a href="login.html">Login</login></a></p>
+                    <button type="submit" class="btn btn-secondary">Register</button>
+                    <p>Existing User? <a href="/login">Login</a></p>
+                    <div class="err_msg">{{msg}}</div>
                   </div>
             </div>
         </div>
