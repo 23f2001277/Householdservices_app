@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomEase Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f5d0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #87ceeb;
+            padding: 10px;
+            text-align: right;
+        }
+        .header a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+        }
+        .header a#logout {
+            color: red;
+        }
+        .title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: red;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #ff8c00;
+        }
+        .search-container {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-container label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .search-container select, .search-container input[type="text"] {
+            padding: 5px;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .search-container input[type="submit"] {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .example-text {
+            color: #888;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        .table th {
+            background-color: #d3f4d7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="title">Welcome Admin!</span>
+        <a href="admin_dash.html">Home</a>
+        <a href="admin_search.html">Search</a>
+        <a href="admin_summary.html">Summary</a>
+        <a href="login.html" id="logout">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="section-title">Search functionality</div>
+        <div class="search-container">
+            <label for="search-by">Search by:</label>
+            <select id="search-by" name="search-by">
+                <option value="service-request">Service Request</option>
+                <option value="customer">Customer</option>
+                <option value="professional">Professional</option>
+                <!-- Add other options as needed -->
+            </select>
+            <input type="text" placeholder="Search text">
+            <input type="submit" value="Search">
+        </div>
+
+        <div class="section-title">Service Requests (Closed)</div>
+        <table class="table">
+            <tr>
+                <th>ID</th>
+                <th>Assigned Professional (if any)</th>
+                <th>Requested Date</th>
+                <th>Status (R/A/C)</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Professional 1</td>
+                <td>07/08/2024</td>
+                <td>Closed</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Professional 2</td>
+                <td>08/08/2024</td>
+                <td>Closed</td>
+            </tr>

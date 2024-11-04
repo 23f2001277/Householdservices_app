@@ -34,7 +34,7 @@ def signin():
                 elif user.role == 2:  # Professional
                     return render_template("prof_dash.html")
             else:
-                return render_template("login.html", msg="Invalid user credentials")  # Password does not match
+                return render_template("login.html", msg="Invalid credentials")  # Password does not match
         
         return render_template("login.html", msg="User not found, please register")  # User not found
     
@@ -79,3 +79,7 @@ def signup2():
         db.session.commit()
         return render_template("login.html", msg="Registration successful!!!")
     return render_template("signup2.html", msg="")
+
+@app.route("/new_service", methods=["GET","POST"])
+def new_service():
+    return render_template("admin_serv.html")

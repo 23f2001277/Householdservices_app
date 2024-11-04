@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer - Best Salon Packages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f5d0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #87ceeb;
+            padding: 10px;
+            text-align: right;
+        }
+        .header a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+        }
+        .header a#logout {
+            color: red;
+        }
+        .title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: red;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #ff8c00;
+        }
+        .search-container {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-container label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .search-container select, .search-container input[type="text"] {
+            padding: 5px;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .search-container input[type="submit"] {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .example-text {
+            color: #888;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .package-list {
+            margin-top: 20px;
+            border: 2px solid #87ceeb;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .package-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .package-list th, .package-list td {
+            padding: 10px;
+            text-align: left;
+        }
+        .package-list th {
+            font-weight: bold;
+            color: #008080;
+        }
+        .package-list td {
+            border-top: 1px solid #ccc;
+        }
+        .book-button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="title">Welcome to Customer</span>
+        <a href="#">Home</a>
+        <a href="#">Search</a>
+        <a href="#">Summary</a>
+        <a href="#" id="logout">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="section-title">Search functionality</div>
+        <div class="search-container">
+            <label for="search-by">Search by:</label>
+            <select id="search-by" name="search-by">
+                <option value="service-name">Service Name</option>
+                <option value="pin-code">Pin Code</option>
+                <!-- Add other options as needed -->
+            </select>
+            <input type="text" placeholder="Search text">
+            <input type="submit" value="Search">
+        </div>
+
+        <div class="section-title">Best Salon Packages</div>
+        <div class="package-list">
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Details</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Salon classic details like ratings, base price, etc.</td>
+                    <td><a href="#" class="book-button">Book</a></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Salon for men/kids details like ratings, base price, etc.</td>
+                    <td><a href="#" class="book-button">Book</a></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Head massage details like ratings, base price, etc.</td>
+                    <td><a href="#" class="book-button">Book</a></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Waxing details like ratings, base price, etc.</td>
+                    <td><a href="#" class="book-button">Book</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

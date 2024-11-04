@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Remarks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f5d0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            border: 2px solid #87ceeb;
+            border-radius: 10px;
+            padding: 20px;
+            width: 350px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .form-container h2 {
+            margin: 0;
+            color: #008080;
+        }
+        .form-container h3 {
+            margin: 10px 0;
+            color: #666;
+        }
+        .input-field {
+            width: 90%;
+            padding: 5px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .rating-container {
+            margin: 15px 0;
+        }
+        .rating-container span {
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+        .rating-container .selected {
+            color: #FF6347;
+        }
+        .remarks-area {
+            width: 90%;
+            height: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+        .button-container {
+            margin-top: 15px;
+        }
+        .button {
+            padding: 8px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .button-submit {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button-close {
+            background-color: #87ceeb;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Service Remarks</h2>
+        <h3>Request ID: xxx-xxx</h3>
+        
+        <input type="text" class="input-field" placeholder="Service Name" readonly>
+        <input type="text" class="input-field" placeholder="Description" readonly>
+        <input type="text" class="input-field" placeholder="dd/mm/yyyy" readonly>
+        
+        <input type="text" class="input-field" placeholder="Professional ID" readonly>
+        <input type="text" class="input-field" placeholder="Professional Name" readonly>
+        <input type="text" class="input-field" placeholder="Contact No." readonly>
+        
+        <div class="rating-container">
+            <label>Service rating:</label><br>
+            <span class="star" onclick="selectRating(1)">&#9733;</span>
+            <span class="star" onclick="selectRating(2)">&#9733;</span>
+            <span class="star" onclick="selectRating(3)">&#9733;</span>
+            <span class="star" onclick="selectRating(4)">&#9733;</span>
+            <span class="star" onclick="selectRating(5)">&#9733;</span>
+        </div>
+        
+        <textarea class="remarks-area" placeholder="Remarks (if any):"></textarea>
+        <form action="/login" method="POST>
+        <div class="button-container">
+            <button class="button button-submit">Submit</button>
+            <button class="button button-close">Close</button>
+        </div>
+        </form>
+    </div>
+
+    <script>
+        // Function to handle star rating selection
+        function selectRating(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.classList.toggle('selected', index < rating);
+            });
+        }
+    </script>
+</body>
+</html>
