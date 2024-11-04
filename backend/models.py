@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+
 db=SQLAlchemy()
 class Admin_Info(db.Model):
     __tablename__="admin_info"

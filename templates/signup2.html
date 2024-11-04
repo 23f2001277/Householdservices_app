@@ -12,6 +12,7 @@
         <div class="center"><h1>HomEase Household Services</h1></div>
         <div class="my_panel">
             <div class="center"><h4>Service Professional Signup</h4></div> 
+            <form action="/signup2" method="POST" class="input_form">
             <div class="input_form">
                 <div class="mb-3">
                     <label for="user_name" class="form-label">Email ID (Username)</label>
@@ -51,7 +52,9 @@
                 <div class="mb-3">
                     <button type="submit" class="btn btn-secondary">Register</button>
                     <p>Existing Professional? <a href="/login">Login</a></p>
+                    <div class="err_msg">{{msg}}</div>
                 </div>
+            </form>
             </div>
         </div>
     </div>
