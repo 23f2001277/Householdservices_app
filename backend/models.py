@@ -32,8 +32,8 @@ class Service(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     name=db.Column(db.String,nullable=False)
     baseprice=db.Column(db.Float, default=0.0)
-    timereq=db.Column(db.Integer,nullable=False)
-    desc=db.column(db.String)
+    desc=db.Column(db.String,nullable=False)
+    # desc=db.column(db.String)
 class Service_req(db.Model):
     __tablename__="service_req"
     id=db.Column(db.Integer,primary_key=True)
@@ -42,4 +42,4 @@ class Service_req(db.Model):
     prof_id=db.Column(db.Integer, db.ForeignKey("prof_info.id"),nullable=False)
     date_of_req=db.Column(db.DateTime,nullable=False)
     date_of_comp=db.Column(db.DateTime,nullable=False)
-    remark=db.Column(db.String)
+    status=db.Column(db.String, nullable=False)

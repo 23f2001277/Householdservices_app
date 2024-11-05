@@ -1,37 +1,6 @@
-<!-- dashboard.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomEase Admin</title>
+{%extends "admin_layout.html"%}  
+{%block content%}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e6f5d0;
-            margin: 0;
-            padding: 0;
-        }
-        .header {
-            background-color: #87ceeb;
-            padding: 10px;
-            text-align: right;
-        }
-        .header a {
-            margin: 0 10px;
-            text-decoration: none;
-            color: #000;
-        }
-        .header a#logout {
-            color: red;
-        }
-        .title {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            color: red;
-            font-weight: bold;
-        }
         .container {
             padding: 20px;
         }
@@ -91,81 +60,69 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <span class="title">Welcome to Admin</span>
-        <a href="#">Home</a>
-        <a href="#">Search</a>
-        <a href="#">Summary</a>
-        <a href="#" id="logout">Logout</a>
-    </div>
+    
 
     <div class="container">
-        <form action="/new_service" method="POST">
+        <form action="/service/{{service_name}}" method="POST">
         <button class="btn-add">+ Add New Service</button></form>
 
         <div class="section-title">Services</div>
+        {%if service%}
         <table class="table">
-            <tr>
+            {%for service in services%}
+             <tr>
                 <th>ID</th>
                 <th>Service Name</th>
                 <th>Base Price (In Rupees)</th>
+                <th>Description</th>
                 <th>Action</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>Kumar Salon</td>
-                <td>100</td>
+             </tr>
+             <tr>
+                <td>{{service.id}}</td>
+                <td>{{service.service_name}}</td>
+                <td>{{service.desc}}</td>
+                <td>{{service.baseprice}}</td>
                 <td class="action-buttons">
                     <button class="btn-edit">Edit</button>
                     <button class="btn-delete">Delete</button>
                 </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Ashoka Laundry Services</td>
-                <td>150(per 15 washes)</td>
-                <td class="action-buttons">
-                    <button class="btn-edit">Edit</button>
-                    <button class="btn-delete">Delete</button>
-                </td>
-            </tr>
+             </tr>
+            {%endfor%}
         </table>
-
+         {%else%}
+         <h3 class="center" style="text-align: center;">No services are available</h3>
+         {%endif%}
         <div class="section-title">Professionals</div>
+        {%if professional%}
         <table class="table">
-            <tr>
+            {%for professional in professionals%}
+             <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Experience (Yrs)</th>
                 <th>Service Name</th>
                 <th>Action</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>Rama Narayan</td>
-                <td>5</td>
-                <td>Catering</td>
+             </tr>
+             <tr>
+                <td>{{prof_info.id}}</td>
+                <td>{{prof_info.full_name}}</td>
+                <td>{{prof_info.experience}}</td>
+                <td>{{prof_info.service_name}}</td>
                 <td class="action-buttons">
                     <button class="btn-approve">Approve</button>
                     <button class="btn-reject">Reject</button>
                     <button class="btn-delete">Delete</button>
                 </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Zubayan</td>
-                <td>3</td>
-                <td>Driving</td>
-                <td class="action-buttons">
-                    <button class="btn-approve">Approve</button>
-                    <button class="btn-reject">Reject</button>
-                    <button class="btn-delete">Delete</button>
-                </td>
-            </tr>
+             </tr>
+            {%endfor%} 
         </table>
-
+        {%else%}
+         <h3 class="center" style="text-align: center;">No professional requests are available</h3>
+         {%endif%}
         <div class="section-title">Service Requests</div>
+        {%if service_request%}
         <table class="table">
+            {%for service_request in service_requests%}
             <tr>
                 <th>ID</th>
                 <th>Assigned Professional (if any)</th>
@@ -173,18 +130,17 @@
                 <th>Status (R/A/C)</th>
             </tr>
             <tr>
-                <td>1</td>
+                <td>{{service_req.id}}</td>
                 <td>Professional 1</td>
-                <td>07/08/2024</td>
-                <td>Requested</td>
+                <td>{{service_req.date_of_req}}</td>
+                <td>{{service_req.status}}</td>
             </tr>
-            <tr>
-                <td>2</td>
-                <td>Professional 2</td>
-                <td>08/08/2024</td>
-                <td>Accepted</td>
-            </tr>
+            {%endfor%}
         </table>
+        {%else%}
+        <h3 class="center" style="text-align: center;">No service requests have been made till now</h3>
+         {%endif%}
     </div>
 </body>
 </html>
+{%endblock%}

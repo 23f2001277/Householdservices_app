@@ -28,11 +28,11 @@ def signin():
         if user: 
             if user.password == pwd:  # Check if the password matches
                 if user.role == 0:  # Admin
-                    return render_template("admin_dash.html")
+                    return render_template("admin_dash.html", name=uname)
                 elif user.role == 1:  # User
-                    return render_template("user_dash.html")
+                    return render_template("user_dash.html", name=uname)
                 elif user.role == 2:  # Professional
-                    return render_template("prof_dash.html")
+                    return render_template("prof_dash.html", name=uname)
             else:
                 return render_template("login.html", msg="Invalid credentials")  # Password does not match
         
@@ -80,6 +80,30 @@ def signup2():
         return render_template("login.html", msg="Registration successful!!!")
     return render_template("signup2.html", msg="")
 
-@app.route("/new_service", methods=["GET","POST"])
-def new_service():
+@app.route("/admin/<name>")
+def admin_dashboard(name):
+    return render_template("admin_dash.html", name=name)
+
+@app.route("/user/<name>")
+def user_dashboard(name):
+    return render_template("user_dash.html", name=name)
+
+@app.route("/prof/<name>")
+def prof_dashboard(name):
+    return render_template("prof_dash.html", name=name)
+
+
+@app.route("/service/<service_name>", methods=["GET","POST"])
+def new_service(service_name):
+    if request.method == "POST":
+        service_name=request.form.get("service_name")
+        baseprice=request.form.get("baseprice")
+        desc=request.form.get("desc")
+        serv=Service.query.filter_by(service_name=service_name).first()
+        if serv:
+            return render_template("admin_serv.html", msg="Sorry, this service has already been registered")
+        new_serv=Service(service_name=service_name, baseprice=baseprice, desc=desc)
+        db.session.add(new_serv)
+        db.session.commit()
+        return render_template("admin_dash.html", msg="Registration successfull!!!")
     return render_template("admin_serv.html")
