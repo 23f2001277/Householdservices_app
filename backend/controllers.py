@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, url_for, redirect, session
 from .models import *
 from flask import current_app as app
 
@@ -28,11 +28,11 @@ def signin():
         if user: 
             if user.password == pwd:  # Check if the password matches
                 if user.role == 0:  # Admin
-                    return render_template("admin_dash.html", name=uname)
+                    return redirect(url_for("admin_dashboard"))
                 elif user.role == 1:  # User
-                    return render_template("user_dash.html", name=uname)
+                    return redirect(url_for("user_dashboard", name=uname))
                 elif user.role == 2:  # Professional
-                    return render_template("prof_dash.html", name=uname)
+                    return redirect(url_for("prof_dashboard", name=uname))
             else:
                 return render_template("login.html", msg="Invalid credentials")  # Password does not match
         
@@ -80,30 +80,44 @@ def signup2():
         return render_template("login.html", msg="Registration successful!!!")
     return render_template("signup2.html", msg="")
 
-@app.route("/admin/<name>")
-def admin_dashboard(name):
-    return render_template("admin_dash.html", name=name)
+@app.route("/admin")
+def admin_dashboard():
+    services=Service.query.all()
+    professionals=Prof_Info.query.all()
+    users=User_Info.query.all()
+    return render_template("admin_dash.html", services=services, professionals=professionals, users=users)
 
-@app.route("/user/<name>")
-def user_dashboard(name):
-    return render_template("user_dash.html", name=name)
+@app.route("/user")
+def user_dashboard():
+    return render_template("user_dash.html")
 
-@app.route("/prof/<name>")
-def prof_dashboard(name):
-    return render_template("prof_dash.html", name=name)
+@app.route("/prof")
+def prof_dashboard():
+    return render_template("prof_dash.html")
 
 
-@app.route("/service/<service_name>", methods=["GET","POST"])
-def new_service(service_name):
+@app.route("/service", methods=["GET","POST"])
+def new_service():
     if request.method == "POST":
-        service_name=request.form.get("service_name")
+        name=request.form.get("service_name")
         baseprice=request.form.get("baseprice")
         desc=request.form.get("desc")
-        serv=Service.query.filter_by(service_name=service_name).first()
-        if serv:
-            return render_template("admin_serv.html", msg="Sorry, this service has already been registered")
-        new_serv=Service(service_name=service_name, baseprice=baseprice, desc=desc)
+        new_serv=Service(name=name, baseprice=baseprice, desc=desc)
         db.session.add(new_serv)
         db.session.commit()
-        return render_template("admin_dash.html", msg="Registration successfull!!!")
-    return render_template("admin_serv.html")
+        return redirect(url_for("admin_dashboard"))
+    else:
+        return render_template("admin_serv.html")
+
+
+@app.route("/logout")
+def logout():
+    return  redirect(url_for("signin"))
+
+@app.route('/delete_service/<int:id>', methods=["POST"])
+def delete_service(id):
+    service = Service.query.get(id)
+    db.session.delete(service)
+    db.session.commit()
+    return redirect(url_for('admin_dashboard')) 
+

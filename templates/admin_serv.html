@@ -60,19 +60,20 @@
 <body>
     <div class="form-container">
         <h2>New Service</h2>
-        <form action="#" method="POST">
+        <form action="/service" method="POST">
             <label for="service_name">Service Name:</label>
-            <input type="text" id="service-name" name="service_name">
+            <input type="text" id="service-name" name="service_name" required>
 
             <label for="desc">Description:</label>
-            <textarea id="desc" name="desc" rows="4"></textarea>
+            <textarea id="desc" name="desc" rows="4" required></textarea>
 
             <label for="baseprice">Base Price:</label>
-            <input type="text" id="baseprice" name="baseprice">
+            <input type="text" id="baseprice" name="baseprice" required>
 
             <button type="submit" class="btn-add">Add</button>
-            <button type="button" class="btn-cancel">Cancel</button>
+            
         </form>
+        <a href="/admin"><button type="button" class="btn-cancel">Cancel</button></a>
     </div>
 </body>
 </html>

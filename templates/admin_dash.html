@@ -1,5 +1,5 @@
-{%extends "admin_layout.html"%}  
-{%block content%}
+{% extends "admin_layout.html" %}
+{% block content %}
     <style>
         .container {
             padding: 20px;
@@ -42,7 +42,7 @@
             background-color: #2196F3;
             color: white;
         }
-        .btn-reject {
+        .btn-reject, .btn-block {
             background-color: #f44336;
             color: white;
         }
@@ -60,16 +60,14 @@
     </style>
 </head>
 <body>
-    
-
     <div class="container">
-        <form action="/service/{{service_name}}" method="POST">
-        <button class="btn-add">+ Add New Service</button></form>
+        <a href="/service" type="button">
+            <button type="submit" class="btn-add">+ Add New Service</button>
+        </a>
 
         <div class="section-title">Services</div>
-        {%if service%}
+        {% if services %}
         <table class="table">
-            {%for service in services%}
              <tr>
                 <th>ID</th>
                 <th>Service Name</th>
@@ -77,70 +75,127 @@
                 <th>Description</th>
                 <th>Action</th>
              </tr>
+             {% for service in services %}
              <tr>
-                <td>{{service.id}}</td>
-                <td>{{service.service_name}}</td>
-                <td>{{service.desc}}</td>
-                <td>{{service.baseprice}}</td>
+                <td>{{ service.id }}</td>
+                <td>{{ service.name }}</td>
+                <td>{{ service.baseprice }}</td>
+                <td>{{ service.desc }}</td>
                 <td class="action-buttons">
-                    <button class="btn-edit">Edit</button>
-                    <button class="btn-delete">Delete</button>
+                    <a href="/service" type="button"><button class="btn-edit">Edit</button></a>
+                    <form action="{{ url_for('delete_service', id=service.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this service?');">Delete</button>
+                    </form>
                 </td>
              </tr>
-            {%endfor%}
+            {% endfor %}
         </table>
-         {%else%}
-         <h3 class="center" style="text-align: center;">No services are available</h3>
-         {%endif%}
+        {% else %}
+        <h3 class="center" style="text-align: center;">No services are available</h3>
+        {% endif %}
+
         <div class="section-title">Professionals</div>
-        {%if professional%}
+        {% if professionals %}
         <table class="table">
-            {%for professional in professionals%}
-             <tr>
+            <tr>
                 <th>ID</th>
                 <th>Name</th>
                 <th>Experience (Yrs)</th>
                 <th>Service Name</th>
                 <th>Action</th>
              </tr>
+             {% for prof_info in professionals %}
              <tr>
-                <td>{{prof_info.id}}</td>
-                <td>{{prof_info.full_name}}</td>
-                <td>{{prof_info.experience}}</td>
-                <td>{{prof_info.service_name}}</td>
+                <td>{{ prof_info.id }}</td>
+                <td>{{ prof_info.full_name }}</td>
+                <td>{{ prof_info.experience }}</td>
+                <td>{{ prof_info.service_name }}</td>
                 <td class="action-buttons">
                     <button class="btn-approve">Approve</button>
                     <button class="btn-reject">Reject</button>
                     <button class="btn-delete">Delete</button>
                 </td>
              </tr>
-            {%endfor%} 
+            {% endfor %} 
         </table>
-        {%else%}
-         <h3 class="center" style="text-align: center;">No professional requests are available</h3>
-         {%endif%}
+        {% else %}
+        <h3 class="center" style="text-align: center;">No professional requests are available</h3>
+        {% endif %}
+
         <div class="section-title">Service Requests</div>
-        {%if service_request%}
+        {% if service_requests %}
         <table class="table">
-            {%for service_request in service_requests%}
             <tr>
                 <th>ID</th>
                 <th>Assigned Professional (if any)</th>
                 <th>Requested Date</th>
                 <th>Status (R/A/C)</th>
             </tr>
+            {% for service_req in service_requests %}
             <tr>
-                <td>{{service_req.id}}</td>
-                <td>Professional 1</td>
-                <td>{{service_req.date_of_req}}</td>
-                <td>{{service_req.status}}</td>
+                <td>{{ service_req.id }}</td>
+                <td>{{ service_req.assigned_professional }}</td>
+                <td>{{ service_req.date_of_req }}</td>
+                <td>{{ service_req.status }}</td>
             </tr>
-            {%endfor%}
+            {% endfor %}
         </table>
-        {%else%}
+        {% else %}
         <h3 class="center" style="text-align: center;">No service requests have been made till now</h3>
-         {%endif%}
+        {% endif %}
+
+        <!-- Manage Users Table -->
+        <div class="section-title">Manage Users</div>
+        {% if users %}
+        <table class="table">
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+            {% for user_info in users %}
+            <tr>
+                <td>{{ user_info.id }}</td>
+                <td>{{ user_info.full_name }}</td>
+                <td>{{ user_info.email }}</td>
+                <td class="action-buttons">
+                    <button class="btn-block" onclick="return confirm('Are you sure you want to block this user?');">Block</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <h3 class="center" style="text-align: center;">No users are available</h3>
+        {% endif %}
+
+        <!-- Manage Professionals Table -->
+        <div class="section-title">Manage Professionals</div>
+        {% if professionals %}
+        <table class="table">
+            <tr>
+                <th>Professional ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Service</th>
+                <th>Action</th>
+            </tr>
+            {% for prof_info in professionals %}
+            <tr>
+                <td>{{ prof_info.id }}</td>
+                <td>{{ prof_info.full_name }}</td>
+                <td>{{ prof_info.email }}</td>
+                <td>{{ prof_info.service_name }}</td>
+                <td class="action-buttons">
+                    <button class="btn-block" onclick="return confirm('Are you sure you want to block this professional?');">Block</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <h3 class="center" style="text-align: center;">No professionals are available</h3>
+        {% endif %}
     </div>
 </body>
 </html>
-{%endblock%}
+{% endblock %}

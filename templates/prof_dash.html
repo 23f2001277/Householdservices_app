@@ -1,29 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomEase</title>
+{% extends "prof_layout.html" %}
+{% block content %}   
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e6f5d0;
-            margin: 0;
-            padding: 0;
-        }
-        .header {
-            background-color: #87ceeb;
-            padding: 10px;
-            text-align: right;
-        }
-        .header a {
-            margin: 0 10px;
-            text-decoration: none;
-            color: #000;
-        }
-        .header a#logout {
-            color: red;
-        }
         .title {
             position: absolute;
             top: 15px;
@@ -78,15 +55,7 @@
             color: white;
         }
     </style>
-</head>
 <body>
-    <div class="header">
-        <span class="title">Welcome Professional!</span>
-        <a href="prof_dash.html">Home</a>
-        <a href="prof_search.html">Search</a>
-        <a href="prof_summary.html">Summary</a>
-        <a href="#" id="logout">Logout</a>
-    </div>
 
     <a href="#" class="profile-link">View/Edit Profile details</a>
 
@@ -152,3 +121,4 @@
     </div>
 </body>
 </html>
+{%endblock%}
