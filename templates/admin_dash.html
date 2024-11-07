@@ -61,6 +61,15 @@
 </head>
 <body>
     <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <a href="/service" type="button">
             <button type="submit" class="btn-add">+ Add New Service</button>
         </a>
@@ -82,7 +91,7 @@
                 <td>{{ service.baseprice }}</td>
                 <td>{{ service.desc }}</td>
                 <td class="action-buttons">
-                    <a href="/service" type="button"><button class="btn-edit">Edit</button></a>
+                    <a href="/edit_service/{{service.id}}" type="button"><button class="btn-edit">Edit</button></a>
                     <form action="{{ url_for('delete_service', id=service.id) }}" method="POST" style="display: inline;">
                         <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this service?');">Delete</button>
                     </form>
@@ -111,7 +120,7 @@
                 <td>{{ prof_info.experience }}</td>
                 <td>{{ prof_info.service_name }}</td>
                 <td class="action-buttons">
-                    <button class="btn-approve">Approve</button>
+                    <form action="{{url_for('approve_professional', id=prof_info.id)}}" method="POST"><button class="btn-approve">Approve</button></form>
                     <button class="btn-reject">Reject</button>
                     <button class="btn-delete">Delete</button>
                 </td>
@@ -160,7 +169,11 @@
                 <td>{{ user_info.full_name }}</td>
                 <td>{{ user_info.email }}</td>
                 <td class="action-buttons">
-                    <button class="btn-block" onclick="return confirm('Are you sure you want to block this user?');">Block</button>
+                    {% if user_info.status %}
+                    <form action="{{url_for('block_user', id=user_info.id)}}" method="POST"> <button class="btn-block" onclick="return confirm('Are you sure you want to block this user?');">Block</button></form>
+                    {% else %}
+                     <h3>User is blocked</h3>
+                     {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -187,7 +200,13 @@
                 <td>{{ prof_info.email }}</td>
                 <td>{{ prof_info.service_name }}</td>
                 <td class="action-buttons">
-                    <button class="btn-block" onclick="return confirm('Are you sure you want to block this professional?');">Block</button>
+                    {% if prof_info.status %}
+                    <form action="{{url_for('block_professional', id=prof_info.id)}}" method="POST">
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to block this professional?');">Block</button>
+                    </form>
+                    {% else %}
+                    <h3>Professional is blocked</h3>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

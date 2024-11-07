@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session, flash
 from .models import *
 from flask import current_app as app
 
@@ -114,10 +114,50 @@ def new_service():
 def logout():
     return  redirect(url_for("signin"))
 
-@app.route('/delete_service/<int:id>', methods=["POST"])
+@app.route("/delete_service/<int:id>", methods=["POST"])
 def delete_service(id):
     service = Service.query.get(id)
     db.session.delete(service)
     db.session.commit()
     return redirect(url_for('admin_dashboard')) 
 
+@app.route("/edit_service/<int:id>", methods=["GET","POST"])
+def edit_service(id):
+    service = Service.query.get(id)
+    if request.method == "POST":
+        name = request.form.get("service_name")
+        baseprice = request.form.get("baseprice")
+        desc = request.form.get("desc")
+        new_serv=Service(name=name, baseprice=baseprice, desc=desc)
+        db.session.add(new_serv)
+        db.session.commit()
+        return redirect(url_for("admin_dashboard"))
+    if request.method  == "GET":
+        return render_template("edit_service.html", service=service)
+
+@app.route('/approve_professional/<int:id>', methods=["POST"])
+def approve_professional(id):
+    professionals=Prof_Info.query.get(id)
+    if professionals:
+        professionals.status=True
+        db.session.commit()
+        flash('{prof_info.full_name} has been approved!', 'success')
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/block_professional/<int:id>", methods=["POST"])
+def block_professional(id):
+    professionals=Prof_Info.query.get(id)
+    if professionals:
+        professionals.status=False
+        db.session.commit()
+        flash('{professionals.full_name} has been blocked!', 'danger')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route("/block_user/<int:id>", methods=["POST"])
+def block_user(id):
+    users=Prof_Info.query.get(id)
+    if users:
+        users.status=False
+        db.session.commit()
+        flash('{users.full_name} has been blocked!', 'danger')
+    return redirect(url_for('admin_dashboard'))

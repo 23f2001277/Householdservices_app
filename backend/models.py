@@ -16,6 +16,7 @@ class User_Info(db.Model):
     full_name=db.Column(db.String,nullable=False)
     location=db.Column(db.String,nullable=False)
     pin_code=db.Column(db.Integer,nullable=False)
+    user_status=db.Column(db.String,default=True)
 class Prof_Info(db.Model):
     __tablename__="prof_info"
     id=db.Column(db.Integer,primary_key=True)
@@ -27,6 +28,7 @@ class Prof_Info(db.Model):
     experience=db.Column(db.Integer,nullable=False)
     location=db.Column(db.String,nullable=False)
     pin_code=db.Column(db.Integer,nullable=False)
+    prof_status=db.Column(db.String,default=False)
 class Service(db.Model):
     __tablename__="service"
     id=db.Column(db.Integer,primary_key=True)
