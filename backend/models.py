@@ -24,18 +24,18 @@ class Prof_Info(db.Model):
     password=db.Column(db.String,nullable=False)
     role=db.Column(db.Integer,default=2)
     full_name=db.Column(db.String,nullable=False)
-    service_name=db.Column(db.String,nullable=False)
+    service_name=db.Column(db.Integer, db.ForeignKey("service.id"), nullable=False)
     experience=db.Column(db.Integer,nullable=False)
     location=db.Column(db.String,nullable=False)
     pin_code=db.Column(db.Integer,nullable=False)
-    prof_status=db.Column(db.String,default=False)
+    prof_status=db.Column(db.String,default='requested')#requested,approved,rejected,blocked
 class Service(db.Model):
     __tablename__="service"
     id=db.Column(db.Integer,primary_key=True)
-    name=db.Column(db.String,nullable=False)
+    name=db.Column(db.String,unique=True,nullable=False)
     baseprice=db.Column(db.Float, default=0.0)
     desc=db.Column(db.String,nullable=False)
-    # desc=db.column(db.String)
+    prof=db.Relationship('Prof_Info', backref='service',cascade='all,delete')
 class Service_req(db.Model):
     __tablename__="service_req"
     id=db.Column(db.Integer,primary_key=True)

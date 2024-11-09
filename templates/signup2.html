@@ -29,6 +29,7 @@
                     <div class="mb-3">
                         <label for="service_name" class="form-label">Service Name</label>
                         <select class="form-control" name="service_name" id="service_name">
+                            <option value="" disabled selected>Please select service name</option>
                             <!-- Populate options dynamically from server -->
                             {% for service in services %}
                                 <option value="{{ service.id }}">{{ service.name }}</option>

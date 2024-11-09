@@ -62,11 +62,13 @@ def signup():
 
 @app.route("/signup2", methods=["GET", "POST"])
 def signup2():
+    services=Service.query.all()
     if request.method == "POST":
         uname = request.form.get("user_name")
         pwd = request.form.get("password")
         full_name = request.form.get("full_name")
         service_name = request.form.get("service_name")
+        
         experience = request.form.get("experience")
         location = request.form.get("location")
         pin_code = request.form.get("pin_code")
@@ -78,7 +80,7 @@ def signup2():
         db.session.add(new_prof)
         db.session.commit()
         return render_template("login.html", msg="Registration successful!!!")
-    return render_template("signup2.html", msg="")
+    return render_template("signup2.html", msg="", services=services)
 
 @app.route("/admin")
 def admin_dashboard():
@@ -102,6 +104,9 @@ def new_service():
         name=request.form.get("service_name")
         baseprice=request.form.get("baseprice")
         desc=request.form.get("desc")
+        existing_service = Service.query.filter_by(name=name).first()
+        if existing_service:
+            return render_template("admin_serv.html", msg="Service name already exists. Please edit the existing service instead.")
         new_serv=Service(name=name, baseprice=baseprice, desc=desc)
         db.session.add(new_serv)
         db.session.commit()
@@ -121,43 +126,96 @@ def delete_service(id):
     db.session.commit()
     return redirect(url_for('admin_dashboard')) 
 
-@app.route("/edit_service/<int:id>", methods=["GET","POST"])
+@app.route('/edit_service/<int:id>', methods=['GET', 'POST'])
 def edit_service(id):
-    service = Service.query.get(id)
-    if request.method == "POST":
-        name = request.form.get("service_name")
-        baseprice = request.form.get("baseprice")
-        desc = request.form.get("desc")
-        new_serv=Service(name=name, baseprice=baseprice, desc=desc)
-        db.session.add(new_serv)
-        db.session.commit()
-        return redirect(url_for("admin_dashboard"))
-    if request.method  == "GET":
-        return render_template("edit_service.html", service=service)
+    service = Service.query.get(id)  # Fetch the service from the database
+    if request.method == 'POST':
+        if service:
+            service.name = request.form['service_name']
+            service.desc = request.form['desc']
+            service.baseprice = request.form['baseprice']
+            db.session.commit()  # Save the updated service back to the database
+            return redirect(url_for("admin_dashboard"))  # Redirect to the admin page or another page
+        else:
+            return "Service not found", 404
+    else:  # Handle GET request
+        if service:
+            return render_template("edit_service.html", service=service)  # Render edit form with service details
+        else:
+            return "Service not found", 404
 
 @app.route('/approve_professional/<int:id>', methods=["POST"])
 def approve_professional(id):
     professionals=Prof_Info.query.get(id)
-    if professionals:
-        professionals.status=True
-        db.session.commit()
-        flash('{prof_info.full_name} has been approved!', 'success')
+    if request.method == "POST":
+        if professionals:
+            professionals.prof_status='approved'
+            db.session.commit()
+        
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route('/delete_professional/<int:id>', methods=["POST"])
+def delete_professional(id):
+    professionals=Prof_Info.query.get(id)
+    db.session.delete(professionals)
+    db.session.commit()
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/block_professional/<int:id>", methods=["POST"])
 def block_professional(id):
     professionals=Prof_Info.query.get(id)
-    if professionals:
-        professionals.status=False
-        db.session.commit()
-        flash('{professionals.full_name} has been blocked!', 'danger')
+    if request.method == "POST":
+        if professionals:
+            professionals.prof_status='blocked'
+            db.session.commit()
+            return redirect(url_for('admin_dashboard'))
+    else:
+        return "Professionals not found", 404
+
+@app.route("/unblock_professional/<int:id>", methods=["POST"])
+def unblock_professional(id):
+    professionals=Prof_Info.query.get(id)
+    if request.method == "POST":
+        if professionals:
+            professionals.prof_status='approved'
+            db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
 @app.route("/block_user/<int:id>", methods=["POST"])
 def block_user(id):
-    users=Prof_Info.query.get(id)
-    if users:
-        users.status=False
-        db.session.commit()
-        flash('{users.full_name} has been blocked!', 'danger')
+    users=User_Info.query.get(id)
+    if request.method == "POST":
+        if users:
+            users.user_status=False
+            db.session.commit()
+            return redirect(url_for('admin_dashboard'))
+    else:
+        return "User not found", 404
+
+@app.route("/unblock_user/<int:id>", methods=["POST"])
+def unblock_user(id):
+    users=User_Info.query.get(id)
+    if request.method == "POST":
+        if users:
+            users.user_status=False
+            db.session.commit()
     return redirect(url_for('admin_dashboard'))
+
+@app.route("/search_professional", methods=["GET"])
+def search_professional():
+    query = request.args.get("query")
+    professionals = Prof_Info.query.filter(
+        (Prof_Info.full_name.ilike(f"%{query}%")) | 
+        (Prof_Info.email.ilike(f"%{query}%"))
+    ).all()
+    
+    return render_template("admin_search.html", professionals=professionals)
+
+@app.route("/professional_profile/<int:id>")
+def view_professional_profile(id):
+    professional = Prof_Info.query.get(id)
+    if professional:
+        return render_template("professional_profile.html", professional=professional)
+    else:
+        return "Professional not found", 404

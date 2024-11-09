@@ -3,45 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomEase Admin</title>
+    <title>Responsive Navbar</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #e6f5d0;
             margin: 0;
             padding: 0;
+            background-color: #e6f5d0;
         }
-        .header {
+        .navbar {
             background-color: #87ceeb;
-            padding: 10px;
-            text-align: right;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
         }
-        .header a {
-            margin: 0 10px;
-            text-decoration: none;
-            color: #000;
-        }
-        .header a#logout {
-            color: red;
-        }
-        .title {
-            position: absolute;
-            top: 15px;
-            left: 15px;
+        .navbar .title {
             color: red;
             font-weight: bold;
+        }
+        .navbar a {
+            text-decoration: none;
+            color: #000;
+            padding: 14px 20px;
+            transition: background-color 0.3s;
+        }
+        .navbar a:hover {
+            background-color: #b0e0e6;
+        }
+        .navbar #logout {
+            color: red;
+        }
+        .navbar form {
+            display: inline;
+        }
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .navbar a {
+                padding: 10px;
+                width: 100%;
+                text-align: left;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="navbar">
         <span class="title">Welcome {{name}}</span>
-        <a href="/admin">Home</a>
-        <a href="#">Search</a>
-        <a href="#">Summary</a>
-        <a href="/logout" id="logout">Logout</a>
+        <div>
+            <a href="/admin">Home</a>
+            <form action="/search_professional" method="GET" style="display: inline;">
+                <button type="submit" style="background: none; border: none; padding: 0; cursor: pointer; color: inherit;">Search</button>
+            </form>
+            <a href="#">Summary</a>
+            <a href="/logout" id="logout">Logout</a>
+        </div>
     </div>
     {%block content%}
-    <!-- dynamic content -->
+    <!-- Content goes here -->
      {%endblock%}
 </body>
+</html>
