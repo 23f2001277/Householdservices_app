@@ -137,15 +137,19 @@
             </tr>
             {% for user_info in users %}
             <tr>
-                <td>{{ user_info.id }}</td>
+                <td><a href="/user_profile/{{user_info.id}}">{{ user_info.id }}</a></td>
                 <td>{{ user_info.full_name }}</td>
                 <td>{{ user_info.email }}</td>
                 <td class="action-buttons">
                     
-                    {% if user_info.user_status == True %}
-                    <form action="{{url_for('block_user', id=user_info.id)}}" method="POST"> <button class="btn-block" onclick="return confirm('Are you sure you want to block this user?');">Block</button></form>
-                    {% else %}
-                    <form action="{{url_for('unblock_user', id=user_info.id)}}" method="POST"> <button class="btn-block" onclick="return confirm('Are you sure you want to unblock this user?');">Unblock</button></form>
+                    {% if user_info.user_status == 'approved' %}
+                    <form action="{{url_for('block_user', id=user_info.id)}}" method="POST"> 
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to block this user?');">Block</button>
+                    </form>
+                    {% elif user_info.user_status == 'blocked' %}
+                    <form action="{{url_for('unblock_user', id=user_info.id)}}" method="POST"> 
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to unblock this user?');">Unblock</button>
+                    </form>
                      {% endif %}
                 </td>
             </tr>
@@ -168,7 +172,7 @@
             </tr>
             {% for prof_info in professionals %}
             <tr>
-                <td>{{ prof_info.id }}</td>
+                <td><a href="/professional_profile/{{prof_info.id}}">{{ prof_info.id }}</a></td>
                 <td>{{ prof_info.full_name }}</td>
                 <td>{{ prof_info.email }}</td>
                 <td>{{ prof_info.service.name }}</td>

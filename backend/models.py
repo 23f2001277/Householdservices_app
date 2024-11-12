@@ -16,7 +16,7 @@ class User_Info(db.Model):
     full_name=db.Column(db.String,nullable=False)
     location=db.Column(db.String,nullable=False)
     pin_code=db.Column(db.Integer,nullable=False)
-    user_status=db.Column(db.String,default=True)
+    user_status=db.Column(db.String,default='approved')
 class Prof_Info(db.Model):
     __tablename__="prof_info"
     id=db.Column(db.Integer,primary_key=True)

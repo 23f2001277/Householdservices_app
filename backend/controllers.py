@@ -187,7 +187,7 @@ def block_user(id):
     users=User_Info.query.get(id)
     if request.method == "POST":
         if users:
-            users.user_status=False
+            users.user_status='blocked'
             db.session.commit()
             return redirect(url_for('admin_dashboard'))
     else:
@@ -198,7 +198,7 @@ def unblock_user(id):
     users=User_Info.query.get(id)
     if request.method == "POST":
         if users:
-            users.user_status=False
+            users.user_status='approved'
             db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
@@ -219,3 +219,19 @@ def view_professional_profile(id):
         return render_template("professional_profile.html", professional=professional)
     else:
         return "Professional not found", 404
+    
+@app.route("/user_profile/<int:id>", methods=["GET"])
+def view_user_profile(id):
+    user = User_Info.query.get(id)
+    if user:
+        return render_template("user_profile.html", user=user)
+    else:
+        return "User not found", 404
+    
+@app.route('/close')
+def close():
+    return redirect(url_for('user_remark'))
+
+@app.route('/user_remark')
+def user_remark():
+    return render_template('user_remark.html')

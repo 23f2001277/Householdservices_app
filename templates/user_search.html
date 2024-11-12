@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+{%extends "user_layout.html"%}  
+{%block content%}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer - Best Salon Packages</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -102,13 +99,7 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <span class="title">Welcome to Customer</span>
-        <a href="#">Home</a>
-        <a href="#">Search</a>
-        <a href="#">Summary</a>
-        <a href="#" id="logout">Logout</a>
-    </div>
+   
 
     <div class="container">
         <div class="search-container">
@@ -122,7 +113,7 @@
             <input type="submit" value="Search">
         </div>
 
-        <div class="section-title">Best Salon Packages</div>
+        <div class="section-title">Best {{service.name}} Packages</div>
         <div class="package-list">
             <table>
                 <tr>
@@ -135,23 +126,9 @@
                     <td>Salon classic details like ratings, base price, etc.</td>
                     <td><a href="#" class="book-button">Book</a></td>
                 </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Salon for men/kids details like ratings, base price, etc.</td>
-                    <td><a href="#" class="book-button">Book</a></td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Head massage details like ratings, base price, etc.</td>
-                    <td><a href="#" class="book-button">Book</a></td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>Waxing details like ratings, base price, etc.</td>
-                    <td><a href="#" class="book-button">Book</a></td>
-                </tr>
             </table>
         </div>
     </div>
 </body>
 </html>
+{%endblock%}
