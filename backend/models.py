@@ -29,13 +29,14 @@ class Prof_Info(db.Model):
     location=db.Column(db.String,nullable=False)
     pin_code=db.Column(db.Integer,nullable=False)
     prof_status=db.Column(db.String,default='requested')#requested,approved,rejected,blocked
+    service=db.relationship("Service",back_populates="professionals")
 class Service(db.Model):
     __tablename__="service"
     id=db.Column(db.Integer,primary_key=True)
     name=db.Column(db.String,unique=True,nullable=False)
     baseprice=db.Column(db.Float, default=0.0)
     desc=db.Column(db.String,nullable=False)
-    prof=db.Relationship('Prof_Info', backref='service',cascade='all,delete')
+    professionals=db.relationship('Prof_Info', back_populates='service',cascade='all,delete')
 class Service_req(db.Model):
     __tablename__="service_req"
     id=db.Column(db.Integer,primary_key=True)
@@ -43,5 +44,9 @@ class Service_req(db.Model):
     cust_id=db.Column(db.Integer, db.ForeignKey("user_info.id"),nullable=False)
     prof_id=db.Column(db.Integer, db.ForeignKey("prof_info.id"),nullable=False)
     date_of_req=db.Column(db.DateTime,nullable=False)
-    date_of_comp=db.Column(db.DateTime,nullable=False)
+    date_of_comp=db.Column(db.DateTime,nullable=True)
     status=db.Column(db.String, nullable=False)
+    rating = db.Column(db.Integer, nullable=True)
+    service = db.relationship("Service", backref="requests")
+    customer = db.relationship("User_Info", backref="requests")
+    professional = db.relationship("Prof_Info", backref="requests")

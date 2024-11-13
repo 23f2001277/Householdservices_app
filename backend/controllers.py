@@ -1,6 +1,16 @@
 from flask import Flask, render_template, request, url_for, redirect, session, flash
+from datetime import datetime
 from .models import *
 from flask import current_app as app
+
+ROLE_ADMIN = 0
+ROLE_USER = 1
+ROLE_PROFESSIONAL = 2
+
+STATUS_PENDING = "pending"
+STATUS_ACCEPTED = "accepted"
+STATUS_REJECTED = "rejected"
+STATUS_CLOSED = "closed"
 
 
 @app.route("/")
@@ -92,10 +102,6 @@ def admin_dashboard():
 @app.route("/user")
 def user_dashboard():
     return render_template("user_dash.html")
-
-@app.route("/prof")
-def prof_dashboard():
-    return render_template("prof_dash.html")
 
 
 @app.route("/service", methods=["GET","POST"])
@@ -235,3 +241,38 @@ def close():
 @app.route('/user_remark')
 def user_remark():
     return render_template('user_remark.html')
+
+@app.route("/prof_dashboard")
+def prof_dashboard():
+    if "user_id" not in session or session.get("user_role") != 2:
+        return redirect(url_for("signin"))
+
+    # Fetch professional-specific service requests
+    professional_id = session["user_id"]
+    today_services = Service_req.query.filter_by(
+        prof_id=professional_id, status=STATUS_PENDING
+    ).all()
+
+    closed_services = Service_req.query.filter_by(
+        prof_id=professional_id, status=STATUS_CLOSED
+    ).all()
+
+    return render_template("prof_dashboard.html", today_services=today_services, closed_services=closed_services)
+
+
+@app.route("/accept_service/<int:service_id>", methods=["POST"])
+def accept_service(service_id):
+    service = Service_req.query.get(service_id)
+    if service and service.status == STATUS_PENDING:
+        service.status = STATUS_ACCEPTED
+        db.session.commit()
+    return redirect(url_for("prof_dashboard"))
+
+
+@app.route("/reject_service/<int:service_id>", methods=["POST"])
+def reject_service(service_id):
+    service = Service_req.query.get(service_id)
+    if service and service.status == STATUS_PENDING:
+        service.status = STATUS_REJECTED
+        db.session.commit()
+    return redirect(url_for("prof_dashboard"))

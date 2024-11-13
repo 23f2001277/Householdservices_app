@@ -1,67 +1,9 @@
-{% extends "prof_layout.html" %}
-{% block content %}   
-    <style>
-        .title {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            color: red;
-            font-weight: bold;
-        }
-        .profile-link {
-            position: absolute;
-            top: 70px;
-            right: 15px;
-            color: #007bff;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .container {
-            padding: 20px;
-        }
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .table th, .table td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: center;
-        }
-        .table th {
-            background-color: #d3f4d7;
-            font-weight: bold;
-        }
-        .action-buttons button {
-            padding: 5px 10px;
-            margin: 0 5px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .action-buttons .accept {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .action-buttons .reject {
-            background-color: #f44336;
-            color: white;
-        }
-    </style>
+{%extends "prof_layout.html"%}  
+{%block content%}
 <body>
-
-    <a href="#" class="profile-link">View/Edit Profile details</a>
-
-    <div class="container">
-        <div class="section-title">Today services</div>
-        <table class="table">
+    <h2>Today's Services</h2>
+    <table border="1">
+        <thead>
             <tr>
                 <th>ID</th>
                 <th>Customer Name</th>
@@ -69,30 +11,30 @@
                 <th>Location (with pin code)</th>
                 <th>Action</th>
             </tr>
+        </thead>
+        <tbody>
+            {% for service in today_services %}
             <tr>
-                <td>1</td>
-                <td>Ayush Kumar</td>
-                <td>9876878732</td>
-                <td>Kerala-200010</td>
-                <td class="action-buttons">
-                    <button class="accept">Accept</button>
-                    <button class="reject">Reject</button>
+                <td>{{ service.id }}</td>
+                <td>{{ service.customer.full_name }}</td>
+                <td>{{ service.customer.phone if service.customer.phone else 'N/A'}}</td>
+                <td>{{ service.location }} ({{ service.pin_code }})</td>
+                <td>
+                    <form action="{{ url_for('accept_service', service_id=service.id) }}" method="POST" style="display: inline;">
+                        <button type="submit">Accept</button>
+                    </form>
+                    <form action="{{ url_for('reject_service', service_id=service.id) }}" method="POST" style="display: inline;">
+                        <button type="submit">Reject</button>
+                    </form>
                 </td>
             </tr>
-            <tr>
-                <td>2</td>
-                <td>Ashish Singh</td>
-                <td>6699345100</td>
-                <td>Bihar 600033</td>
-                <td class="action-buttons">
-                    <button class="accept">Accept</button>
-                    <button class="reject">Reject</button>
-                </td>
-            </tr>
-        </table>
+            {% endfor %}
+        </tbody>
+    </table>
 
-        <div class="section-title">Closed services</div>
-        <table class="table">
+    <h2>Closed Services</h2>
+    <table border="1">
+        <thead>
             <tr>
                 <th>ID</th>
                 <th>Customer Name</th>
@@ -101,24 +43,20 @@
                 <th>Date</th>
                 <th>Rating</th>
             </tr>
+        </thead>
+        <tbody>
+            {% for service in closed_services %}
             <tr>
-                <td>1</td>
-                <td>Avik Mehta</td>
-                <td>9898345671</td>
-                <td>Bangalore-500012</td>
-                <td>23/7/24</td>
-                <td>9</td>
+                <td>{{ service.id }}</td>
+                <td>{{ service.customer.full_name }}</td>
+                <td>{{ service.customer.phone if service.customer.phone else 'N/A' }}</td>
+                <td>{{ service.location }} ({{ service.pin_code }})</td>
+                <td>{{ service.date_of_comp.strftime('%Y-%m-%d') if service.date_completed else 'N/A' }}</td>
+                <td>{{ service.rating if service.rating else 'N/A' }}</td>
             </tr>
-            <tr>
-                <td>2</td>
-                <td>Sahil Ali</td>
-                <td>8883444466</td>
-                <td>Kolkata-700013</td>
-                <td>2/8/24</td>
-                <td>9.5</td>
-            </tr>
-        </table>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
 {%endblock%}

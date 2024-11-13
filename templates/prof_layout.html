@@ -36,10 +36,10 @@
 <body>
     <div class="header">
         <span class="title">Welcome Professional!</span>
-        <a href="/prof">Home</a>
-        <a href="prof_search.html">Search</a>
-        <a href="prof_summary.html">Summary</a>
-        <a href="/logout" id="logout">Logout</a>
+        <a href="{{ url_for('prof_dashboard') }}">Home</a> |
+        <a href="{{ url_for('search_professional') }}">Search</a> |
+        <a href="#">Summary</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
     </div>
     {%block content%}
     <!-- dynamic content -->
