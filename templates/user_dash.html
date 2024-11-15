@@ -1,61 +1,77 @@
-{%extends "user_layout.html"%}  
-{%block content%}
+{% extends "user_layout.html" %}
+{% block content %}
 <html>
-          <p class="trs" style="text-align: center; font-size: 30px;">Our top-rated services</p>
-          <div class="container">
-            <div class="row">
-              <div class="col">
+    <p class="trs" style="text-align: center; font-size: 30px;">Our top-rated services</p>
+    <div class="container">
+        <div class="row">
+            <div class="col">
                 <div class="card" style="width: 15rem;">
                     <img src="/static/images/salon.jpeg" class="card-img-top" alt="salon" height="158px">
                     <div class="card-body">
-                      <h5 class="card-title">Salon</h5>
-                      <a href="#" class="btn btn-primary">Check out packages</a>
+                        <h5 class="card-title">Salon</h5>
+                        <a href="{{ url_for('list_professionals', name='Salon') }}" class="btn btn-primary">Check out packages</a>
                     </div>
-                  </div>
-              </div>
-              <div class="col">
+                </div>
+            </div>
+            <div class="col">
                 <div class="card" style="width: 15rem;">
                     <img src="/static/images/pest.jpeg" class="card-img-top" alt="pest" height="158px">
                     <div class="card-body">
-                      <h5 class="card-title">Pest Control</h5>
-                      <a href="#" class="btn btn-primary">Check out packages</a>
+                        <h5 class="card-title">Pest Control</h5>
+                        <a href="{{ url_for('list_professionals', name='Pest Control') }}" class="btn btn-primary">Check out packages</a>
                     </div>
-                  </div>
-              </div>
-              <div class="col">
+                </div>
+            </div>
+            <div class="col">
                 <div class="card" style="width: 15rem;">
                     <img src="/static/images/acr.jpeg" class="card-img-top" alt="acrepair">
                     <div class="card-body">
-                      <h5 class="card-title">AC Repair</h5>
-                      <a href="#" class="btn btn-primary">Check out packages</a>
+                        <h5 class="card-title">AC Repair</h5>
+                        <a href="{{ url_for('list_professionals', name='AC Repair') }}" class="btn btn-primary">Check out packages</a>
                     </div>
-                  </div>
-              </div>
-              <div class="container mt-5">
-                <h2 style="text-align: center;">Service History</h2>
-                <table class="table table-bordered table-striped mt-3">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Service Name</th>
-                            <th>Professional Name</th>
-                            <th>Phone No.</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>AC Repair</td>
-                            <td>John Doe</td>
-                            <td>123-456-7890</td>
-                            <td>Requested<a href="/close" class="btn btn-link">Close it?</a></td>
-                        </tr>
-                        <!-- Additional rows as needed -->
-                    </tbody>
-                </table>
+                </div>
             </div>
-          </div>
-          </div>          
+        </div>
+
+        <div class="container mt-5">
+            <h2 style="text-align: center;">Service History</h2>
+            <table class="table table-bordered table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Service Name</th>
+                        <th>Professional Name</th>
+                        <th>Phone No.</th>
+                        <th>Date of Request</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for history, service_req, service in user_service_history %}
+                    
+                    <tr>
+                        <td>{{ service.id }}</td>
+                        <td>{{ service.name }}</td>
+                        <td>{{ service_req.professional.full_name }}</td>
+                        <td>{{ service_req.professional.phone }}</td>
+                        <td>{{ service_req.date_of_req.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ service_req.status }}</td>
+                        <td>
+                            {% if service_req.status == "Pending" %}
+                                <form action="{{ url_for('close_service', service_req_id=service_req.id) }}" method="post" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger">Close It</button>
+                                </form>
+                            {% elif service_req.status == "Completed" and service_req.date_of_comp %}
+                                Completed on {{ service_req.date_of_comp.strftime("%Y-%m-%d %H:%M") }}
+                            {% else %}
+                                Completed
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </html>
-{%endblock%}
+{% endblock %}

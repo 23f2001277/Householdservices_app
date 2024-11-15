@@ -106,20 +106,28 @@
         <div class="section-title">Service Requests</div>
         {% if service_requests %}
         <table class="table">
-            <tr>
-                <th>ID</th>
-                <th>Assigned Professional (if any)</th>
-                <th>Requested Date</th>
-                <th>Status (R/A/C)</th>
-            </tr>
-            {% for service_req in service_requests %}
-            <tr>
-                <td>{{ service_req.id }}</td>
-                <td>{{ service_req.assigned_professional }}</td>
-                <td>{{ service_req.date_of_req }}</td>
-                <td>{{ service_req.status }}</td>
-            </tr>
-            {% endfor %}
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Service</th>
+                    <th>Customer</th>
+                    <th>Professional</th>
+                    <th>Date Requested</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in service_requests %}
+                <tr>
+                    <td>{{ request.id }}</td>
+                    <td>{{ request.service.name }}</td>
+                    <td>{{ request.customer.full_name }}</td>
+                    <td>{{ request.professional.full_name }}</td>
+                    <td>{{ request.date_of_req.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ request.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         {% else %}
         <h3 class="center" style="text-align: center;">No service requests have been made till now</h3>

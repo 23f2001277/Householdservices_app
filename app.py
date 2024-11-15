@@ -3,6 +3,7 @@ from backend.models import db
 app=None
 def setup_app():
     app=Flask(__name__)
+    app.config['SECRET_KEY']= 'ayush'
     app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///household_service.sqlite3"
     db.init_app(app)
     app.debug=True

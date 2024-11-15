@@ -17,6 +17,8 @@ class User_Info(db.Model):
     location=db.Column(db.String,nullable=False)
     pin_code=db.Column(db.Integer,nullable=False)
     user_status=db.Column(db.String,default='approved')
+    phone=db.Column(db.Integer,nullable=False, unique=True)
+
 class Prof_Info(db.Model):
     __tablename__="prof_info"
     id=db.Column(db.Integer,primary_key=True)
@@ -30,6 +32,8 @@ class Prof_Info(db.Model):
     pin_code=db.Column(db.Integer,nullable=False)
     prof_status=db.Column(db.String,default='requested')#requested,approved,rejected,blocked
     service=db.relationship("Service",back_populates="professionals")
+    phone=db.Column(db.Integer,nullable=False, unique=True)
+
 class Service(db.Model):
     __tablename__="service"
     id=db.Column(db.Integer,primary_key=True)
@@ -37,6 +41,7 @@ class Service(db.Model):
     baseprice=db.Column(db.Float, default=0.0)
     desc=db.Column(db.String,nullable=False)
     professionals=db.relationship('Prof_Info', back_populates='service',cascade='all,delete')
+
 class Service_req(db.Model):
     __tablename__="service_req"
     id=db.Column(db.Integer,primary_key=True)
@@ -50,3 +55,10 @@ class Service_req(db.Model):
     service = db.relationship("Service", backref="requests")
     customer = db.relationship("User_Info", backref="requests")
     professional = db.relationship("Prof_Info", backref="requests")
+
+class User_Service_History(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'))
+    service_req_id = db.Column(db.Integer, db.ForeignKey('service_req.id'))
+    user = db.relationship('User_Info', backref=db.backref('user_service_history', lazy=True))
+    service_req = db.relationship('Service_req', backref=db.backref('user_service_history', lazy=True))
