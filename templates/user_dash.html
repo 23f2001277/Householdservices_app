@@ -50,23 +50,22 @@
                     {% for history, service_req, service in user_service_history %}
                     
                     <tr>
-                        <td>{{ service.id }}</td>
+                        <td>{{ service.id }}</td>k
                         <td>{{ service.name }}</td>
                         <td>{{ service_req.professional.full_name }}</td>
                         <td>{{ service_req.professional.phone }}</td>
                         <td>{{ service_req.date_of_req.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>{{ service_req.status }}</td>
                         <td>
-                            {% if service_req.status == "Pending" %}
-                                <form action="{{ url_for('close_service', service_req_id=service_req.id) }}" method="post" style="display: inline;">
-                                    <button type="submit" class="btn btn-danger">Close It</button>
-                                </form>
-                            {% elif service_req.status == "Completed" and service_req.date_of_comp %}
-                                Completed on {{ service_req.date_of_comp.strftime("%Y-%m-%d %H:%M") }}
-                            {% else %}
-                                Completed
+                            {% if service_req.status == "Accepted" %}
+                            <form action="{{ url_for('close_service', service_req_id=service_req.id) }}" method="get" style="display: inline;">
+                                <button type="submit" class="btn btn-warning">Close It</button>
+                            </form>
+                            {% elif service_req.status == "Completed" %}
+                                Completed on {{ service_req.date_of_comp.strftime('%Y-%m-%d %H:%M') if service_req.date_of_comp else 'N/A' }}
                             {% endif %}
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 </tbody>

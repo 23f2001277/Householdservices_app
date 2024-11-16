@@ -61,7 +61,7 @@
 </head>
 <body>
     <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
+        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-messages">
                     {% for category, message in messages %}
@@ -69,7 +69,7 @@
                     {% endfor %}
                 </div>
             {% endif %}
-        {% endwith %}
+        {% endwith %} -->
         <a href="/service" type="button">
             <button type="submit" class="btn-add">+ Add New Service</button>
         </a>
@@ -145,7 +145,7 @@
             </tr>
             {% for user_info in users %}
             <tr>
-                <td><a href="/user_profile/{{user_info.id}}">{{ user_info.id }}</a></td>
+                <td><a href="{{ url_for('view_user_profile', id=user_info.id)}}">{{ user_info.id }}</a></td>
                 <td>{{ user_info.full_name }}</td>
                 <td>{{ user_info.email }}</td>
                 <td class="action-buttons">

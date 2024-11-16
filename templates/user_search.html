@@ -122,9 +122,15 @@
                     <th>Action</th>
                 </tr>
                 <tr>
-                    <td>1</td>
-                    <td>Salon classic details like ratings, base price, etc.</td>
-                    <td><a href="#" class="book-button">Book</a></td>
+                    {% for professional in professionals %}
+                        <li>
+                            {{ professional.full_name }} ({{ professional.service_name }})
+                            <form action="{{ url_for('book_professional') }}" method="post">
+                                <input type="hidden" name="professional_id" value="{{ professional.id }}">
+                                <input type="submit" value="Book">
+                            </form>
+                        </li>
+                    {% endfor %}
                 </tr>
             </table>
         </div>

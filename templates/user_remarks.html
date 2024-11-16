@@ -80,31 +80,37 @@
 <body>
     <div class="form-container">
         <h2>Service Remarks</h2>
-        <h3>Request ID: xxx-xxx</h3>
+        <h3>Request ID: {{ service_req.id }}</h3>
         
-        <input type="text" class="input-field" placeholder="Service Name" readonly>
-        <input type="text" class="input-field" placeholder="Description" readonly>
-        <input type="text" class="input-field" placeholder="dd/mm/yyyy" readonly>
-        
-        <input type="text" class="input-field" placeholder="Professional ID" readonly>
-        <input type="text" class="input-field" placeholder="Professional Name" readonly>
-        <input type="text" class="input-field" placeholder="Contact No." readonly>
-        
-        <div class="rating-container">
-            <label>Service rating:</label><br>
-            <span class="star" onclick="selectRating(1)">&#9733;</span>
-            <span class="star" onclick="selectRating(2)">&#9733;</span>
-            <span class="star" onclick="selectRating(3)">&#9733;</span>
-            <span class="star" onclick="selectRating(4)">&#9733;</span>
-            <span class="star" onclick="selectRating(5)">&#9733;</span>
-        </div>
-        
-        <textarea class="remarks-area" placeholder="Remarks (if any):"></textarea>
-        <form action="/login" method="POST>
-        <div class="button-container">
-            <button class="button button-submit">Submit</button>
-            <button class="button button-close">Close</button>
-        </div>
+        <form action="{{ url_for('submit_feedback', service_req_id=service_req.id) }}" method="POST">
+            <!-- Read-only fields dynamically filled by server -->
+            <input type="text" class="input-field" value="{{ service.name }}" readonly>
+            <input type="text" class="input-field" value="{{ service.description }}" readonly>
+            <input type="text" class="input-field" value="{{ service_req.date_of_req.strftime('%d/%m/%Y') }}" readonly>
+            <input type="text" class="input-field" value="{{ service_req.professional.id }}" readonly>
+            <input type="text" class="input-field" value="{{ service_req.professional.full_name }}" readonly>
+            <input type="text" class="input-field" value="{{ service_req.professional.phone }}" readonly>
+            
+            <!-- Rating Selection -->
+            <div class="rating-container">
+                <label>Service rating:</label><br>
+                <span class="star" onclick="selectRating(1)">&#9733;</span>
+                <span class="star" onclick="selectRating(2)">&#9733;</span>
+                <span class="star" onclick="selectRating(3)">&#9733;</span>
+                <span class="star" onclick="selectRating(4)">&#9733;</span>
+                <span class="star" onclick="selectRating(5)">&#9733;</span>
+            </div>
+            <!-- Hidden input to store rating -->
+            <input type="hidden" name="rating" id="rating">
+
+            <!-- Remarks Text Area -->
+            <textarea class="remarks-area" name="remarks" placeholder="Remarks (if any):"></textarea>
+            
+            <!-- Buttons -->
+            <div class="button-container">
+                <button type="submit" class="button button-submit">Submit</button>
+                <a href="{{ url_for('user_dashboard') }}" class="button button-close">Cancel</a>
+            </div>
         </form>
     </div>
 
@@ -115,6 +121,8 @@
             stars.forEach((star, index) => {
                 star.classList.toggle('selected', index < rating);
             });
+            // Update hidden input with selected rating
+            document.getElementById('rating').value = rating;
         }
     </script>
 </body>

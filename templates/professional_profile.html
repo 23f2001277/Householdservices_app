@@ -8,12 +8,13 @@
 <body>
     <h1>Profile of {{ professional.full_name }}</h1>
     <p>Email: {{ professional.email }}</p>
-    <p>Service: {{ professional.service_name }}</p>
+    <p>Service: {{ professional.service.name }}</p>
     <p>Experience: {{ professional.experience }}</p>
     <p>Phone Number: {{ professional.phone }}</p>
     <p>Location: {{ professional.location }}</p>
     <p>Pin Code: {{ professional.pin_code }}</p>
     <p>Status: {{ professional.prof_status }}</p>
+    <p>Average Rating: {{ average_rating }}</p>
     
     <!-- <a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a> -->
 </body>

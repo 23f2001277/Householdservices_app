@@ -107,6 +107,7 @@ def admin_dashboard():
 @app.route("/user")
 def user_dashboard():
     user_id = session["user_id"]
+    user_info = User_Info.query.get(user_id)
     
     # Fetch the user service history
     user_service_history = db.session.query(User_Service_History, Service_req, Service).join(
@@ -126,9 +127,9 @@ def user_dashboard():
         user_service_history=user_service_history,
         upcoming_services=upcoming_services,
         service_requests=service_requests,
-        services=services
+        services=services,
+        user_info=user_info  # Pass the user_info variable to the template
     )
-
 
 
 @app.route("/service", methods=["GET","POST"])
@@ -257,19 +258,23 @@ def search_user():
 def view_professional_profile(id):
     professional = Prof_Info.query.get(id)
     if professional:
-        return render_template("professional_profile.html", professional=professional)
+        # Calculate the average rating
+        ratings = Rating.query.filter_by(professional_id=id).all()
+        if ratings:
+            average_rating = sum(rating.rating for rating in ratings) / len(ratings)
+        else:
+            average_rating = 0
+        return render_template("professional_profile.html", professional=professional, average_rating=average_rating)
     else:
         return "Professional not found", 404
     
-@app.route("/user_profile", methods=["GET"])
-def view_user_profile():
-    user_id = session['user_id']
-    user = User_Info.query.get(user_id)
+@app.route("/user_profile/<int:id>")
+def view_user_profile(id):
+    user = User_Info.query.get(id)
     if user:
         return render_template("user_profile.html", user=user)
     else:
         return "User not found", 404
-    
 @app.route("/user_remark")
 def user_remark():
     return render_template("user_remark.html")
@@ -374,13 +379,40 @@ def book_professional(professional_id):
 
 
 
-@app.route('/close_service/<int:service_req_id>', methods=['POST'])
+@app.route('/close_service/<int:service_req_id>', methods=['GET'])
 def close_service(service_req_id):
     # Find the service request by ID
     service_req = Service_req.query.get(service_req_id)
-    if service_req and service_req.status == "Pending":
-        # Update the status and date of completion
-        service_req.status = "Completed"
-        service_req.date_of_comp = datetime.now()
-        db.session.commit()
+    if service_req and service_req.status in ["Pending", "Accepted"]:
+        # Render the user_remarks.html page, passing the service request details
+        return render_template('user_remarks.html', service_req=service_req)
+    else:
+        return "Service not found or cannot be closed", 404
+
+@app.route('/submit_feedback/<int:service_req_id>', methods=['POST'])
+def submit_feedback(service_req_id):
+    # Fetch the service request
+    service_req = Service_req.query.get(service_req_id)
+
+    if not service_req:
+        return "Service request not found", 404
+
+    # Update status to 'Completed'
+    service_req.status = "Completed"
+    service_req.date_of_comp = datetime.now()
+    
+    # Save the user's rating and remarks
+    service_req.rating = request.form.get('rating')  # This comes from the 'name' attribute in the form
+    service_req.remarks = request.form.get('remarks')  # User's remarks from the textarea
+    
+
+    db.session.commit()
     return redirect(url_for('user_dashboard'))
+
+# @app.route("/user/search", methods=["GET", "POST"])
+# def search_professionals():
+#     if request.method == "POST":
+#         service_name = request.form.get("service_name")
+#         professionals = Prof_Info.query.filter_by(service_name=service_name).all()
+#         return render_template("search_results.html", professionals=professionals)
+#     return render_template("user_dash.html")
