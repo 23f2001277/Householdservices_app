@@ -44,25 +44,34 @@
                         <th>Phone No.</th>
                         <th>Date of Request</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for history, service_req, service in user_service_history %}
                     
                     <tr>
-                        <td>{{ service.id }}</td>k
+                        <td>{{ service_req.id }}</td>
                         <td>{{ service.name }}</td>
                         <td>{{ service_req.professional.full_name }}</td>
                         <td>{{ service_req.professional.phone }}</td>
                         <td>{{ service_req.date_of_req.strftime('%Y-%m-%d %H:%M') }}</td>
-                        <td>{{ service_req.status }}</td>
                         <td>
-                            {% if service_req.status == "Accepted" %}
+                            {% if service_req.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                            {% elif service_req.status == 'accepted' %}
+                            <span class="badge badge-success">Accepted</span>
+                            {% elif service_req.status == 'rejected' %}
+                            <span class="badge badge-danger">Rejected</span>
+                            {% else %}
+                            {{ service_req.status }}
+                            {% endif %}
+                        </td>
+                        <td> 
+                            {% if service_req.status == 'accepted' %}
                             <form action="{{ url_for('close_service', service_req_id=service_req.id) }}" method="get" style="display: inline;">
                                 <button type="submit" class="btn btn-warning">Close It</button>
                             </form>
-                            {% elif service_req.status == "Completed" %}
-                                Completed on {{ service_req.date_of_comp.strftime('%Y-%m-%d %H:%M') if service_req.date_of_comp else 'N/A' }}
                             {% endif %}
                         </td>
                         

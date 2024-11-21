@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomEase</title>
+    <title>HomEase Professional</title>
     <link rel="stylesheet" href="/static/styles/main.css">
     <style>
         body {
@@ -36,11 +36,11 @@
 </head>
 <body>
     <div class="header">
-        <span class="title">Welcome Professional!</span>
-        <a href="#">My Profile</a> |
+        <span class="title">Welcome {{professional_name}}!</span>
+        <a href="{{ url_for('professional_profile')}}">My Profile</a> |
         <a href="{{ url_for('prof_dashboard') }}">Home</a> |
-        <a href="{{ url_for('search_professional') }}">Search</a> |
-        <a href="#">Summary</a> |
+        <a href="{{ url_for('search_professionals', professional_id=professional.id) }}">Search</a> |
+        <a href="{{ url_for('professional_summary', professional_id=professional.id)}}">Summary</a> |
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
     {%block content%}

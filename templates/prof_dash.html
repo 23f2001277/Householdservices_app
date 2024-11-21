@@ -132,32 +132,37 @@
         </table>
     </div>
 
-    <h2 class="section-title">Closed Services</h2>
+    <h2 class="section-title">Closed Service</h2>
     <div class="table-container">
         <table class="styled-table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Customer Name</th>
                     <th>Contact Phone</th>
                     <th>Location (with pin code)</th>
                     <th>Date</th>
                     <th>Rating</th>
+                    <th>Remarks</th>
                 </tr>
             </thead>
             <tbody>
                 {% for service in closed_services %}
                 <tr>
-                    <td>{{ service.id }}</td>
-                    <td>{{ service.customer.full_name }}</td>
-                    <td>{{ service.customer.phone if service.customer.phone else 'N/A' }}</td>
-                    <td>{{ service.location }} ({{ service.pin_code }})</td>
-                    <td>{{ service.date_of_comp.strftime('%Y-%m-%d') if service.date_completed else 'N/A' }}</td>
-                    <td>{{ service.rating if service.rating else 'N/A' }}</td>
+                    <td>{{ service.customer_name }}</td>
+                    <td>{{ service.customer_phone if service.customer_phone else 'N/A' }}</td>
+                    <td>{{ service.customer_location }} ({{ service.customer_pin_code }})</td>
+                    <td>{{ service.date_of_completion.strftime('%Y-%m-%d') if service.date_of_completion else 'N/A' }}</td>
+                    <td>{{ service.rating or 'No Rating' }}</td>
+                    <td>{{ service.remarks or 'No Remarks' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No closed services available.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
 </body>
 {% endblock %}

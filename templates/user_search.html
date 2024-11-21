@@ -1,5 +1,7 @@
-{%extends "user_layout.html"%}  
-{%block content%}
+{% extends "user_layout.html" %}  
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <style>
         body {
@@ -40,30 +42,25 @@
         .search-container {
             margin-top: 20px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
         }
         .search-container label {
-            margin-right: 10px;
+            margin-bottom: 5px;
             font-weight: bold;
         }
         .search-container select, .search-container input[type="text"] {
-            padding: 5px;
-            margin-right: 10px;
+            padding: 8px;
+            margin-bottom: 10px;
             border-radius: 4px;
             border: 1px solid #ccc;
         }
-        .search-container input[type="submit"] {
-            padding: 5px 10px;
+        .search-container button {
+            padding: 8px 12px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-        }
-        .example-text {
-            color: #888;
-            font-size: 14px;
-            margin-top: 5px;
         }
         .package-list {
             margin-top: 20px;
@@ -83,9 +80,13 @@
         .package-list th {
             font-weight: bold;
             color: #008080;
+            background-color: #f0f8ff;
         }
         .package-list td {
             border-top: 1px solid #ccc;
+        }
+        .package-list td.action {
+            text-align: center;
         }
         .book-button {
             padding: 5px 10px;
@@ -96,45 +97,72 @@
             cursor: pointer;
             text-decoration: none;
         }
+        .no-results {
+            color: red;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-   
-
     <div class="container">
+        <!-- Search Form -->
         <div class="search-container">
-            <label for="search-by">Search by:</label>
-            <select id="search-by" name="search-by">
-                <option value="service-name">Service Name</option>
-                <option value="pin-code">Pin Code</option>
-                <!-- Add other options as needed -->
-            </select>
-            <input type="text" placeholder="Search text">
-            <input type="submit" value="Search">
+            <form method="POST" action="/professional/search">
+                <label for="search-by">Search by :</label>
+                <select id="search_for" name="search_by" required>
+                    <option value="service">Service Name</option>
+                    <option value="name">Professional Name</option>
+                    <option value="location">Location</option>
+                    <option value="pin">Pin Code</option>
+                </select>
+                <input type="text" name="search_value" placeholder="Enter search value" required>
+                <button type="submit">Search</button>
+            </form>
         </div>
 
-        <div class="section-title">Best {{service.name}} Packages</div>
-        <div class="package-list">
+        <!-- Search Results -->
+        <div class="section-title">Search Results</div>
+        {% if search_history %}
+        <div class="results-list">
             <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Details</th>
-                    <th>Action</th>
-                </tr>
-                <tr>
-                    {% for professional in professionals %}
-                        <li>
-                            {{ professional.full_name }} ({{ professional.service_name }})
-                            <form action="{{ url_for('book_professional') }}" method="post">
-                                <input type="hidden" name="professional_id" value="{{ professional.id }}">
-                                <input type="submit" value="Book">
+                <thead>
+                    <tr>
+                        <th>Professional Name</th>
+                        <th>Service Name</th>
+                        <th>Location</th>
+                        <th>Average Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in search_history %}
+                    <tr>
+                        <td>{{ result.Prof_Info.full_name }}</td>
+                        <td>{{ result.service_name }}</td>
+                        <td>{{ result.Prof_Info.location }}</td>
+                        <td>{{ result.avg_rating | round(2) if result.avg_rating else "No Rating" }}</td>
+                        <td>
+                            <!-- Book Now Button -->
+                            <form action="{{ url_for('book_professional', professional_id=result.Prof_Info.id) }}" method="post">
+                                <input type="hidden" name="service_id" value="{{ result.service_name.id }}">
+                                <button type="submit" class="book-button">Book Now</button>
                             </form>
-                        </li>
+                            
+                            
+                            
+                        </td>
+                    </tr>
                     {% endfor %}
-                </tr>
+                </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="no-results">No matching results found.</div>
+        {% endif %}
     </div>
 </body>
+
 </html>
-{%endblock%}
+{% endblock %}

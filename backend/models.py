@@ -53,9 +53,10 @@ class Service_req(db.Model):
     status=db.Column(db.String, nullable=False, default="Pending")
     remarks = db.Column(db.String, nullable=True)
     rating = db.Column(db.Integer, nullable=True)
-    service = db.relationship("Service", backref="requests")
-    customer = db.relationship("User_Info", backref="requests")
-    professional = db.relationship("Prof_Info", backref="requests")
+    service = db.relationship("Service", backref="service_req")
+    customer = db.relationship("User_Info", backref="service_req")
+    professional = db.relationship("Prof_Info", backref="service_req")
+
 
 class User_Service_History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,8 +66,8 @@ class User_Service_History(db.Model):
     service_req = db.relationship('Service_req', backref=db.backref('user_service_history', lazy=True))
 
 
-class Rating(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    rating = db.Column(db.Integer, nullable=False)
-    professional_id = db.Column(db.Integer, db.ForeignKey('prof_info.id'), nullable=False)
+# class Rating(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     rating = db.Column(db.Integer, nullable=False)
+#     professional_id = db.Column(db.Integer, db.ForeignKey('prof_info.id'), nullable=False)
     

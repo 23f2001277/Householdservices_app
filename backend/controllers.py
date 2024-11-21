@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, url_for, redirect, session, f
 from datetime import datetime
 from .models import *
 from flask import current_app as app
+from sqlalchemy import cast, String, func, or_
+import matplotlib.pyplot as plt
+import os
 
 ROLE_ADMIN = 0
 ROLE_USER = 1
@@ -22,9 +25,12 @@ def home():
 def signin():
     if request.method == "GET":
         return render_template('login.html')
+    
     if request.method == "POST":
         uname = request.form.get("user_name")
         pwd = request.form.get("password")
+        
+        # Query for user, admin, and professional
         usr = User_Info.query.filter_by(email=uname).first()
         adm = Admin_Info.query.filter_by(email=uname).first()
         prof = Prof_Info.query.filter_by(email=uname).first()
@@ -36,10 +42,26 @@ def signin():
             user = adm
         elif prof:
             user = prof
-        if user: 
-            session['user_id'] = user.id
-            session['role'] = user.role
+        
+        if user:
             if user.password == pwd:  # Check if the password matches
+                # Handle blocked accounts
+                if isinstance(user, User_Info) and user.user_status == 'blocked':
+                    return render_template(
+                        "blocked_message.html",
+                        message="Your account has been restricted. Please contact support."
+                    )
+                if isinstance(user, Prof_Info) and user.prof_status == 'blocked':
+                    return render_template(
+                        "blocked_message.html",
+                        message="Your account has been restricted. Please contact support."
+                    )
+                
+                # Valid user, set session details
+                session['user_id'] = user.id
+                session['role'] = user.role
+                
+                # Redirect based on role
                 if user.role == 0:  # Admin
                     return redirect(url_for("admin_dashboard"))
                 elif user.role == 1:  # User
@@ -47,11 +69,10 @@ def signin():
                 elif user.role == 2:  # Professional
                     return redirect(url_for("prof_dashboard", name=uname))
             else:
-                return render_template("login.html", msg="Invalid credentials")  # Password does not match
+                return render_template("login.html", msg="Invalid credentials")  # Password mismatch
         
         return render_template("login.html", msg="User not found, please register")  # User not found
-    
-    # return render_template("login.html", msg="")
+
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -110,15 +131,15 @@ def user_dashboard():
     user_info = User_Info.query.get(user_id)
     
     # Fetch the user service history
-    user_service_history = db.session.query(User_Service_History, Service_req, Service).join(
+    user_service_history = db.session.query(User_Service_History, Service_req, Service).outerjoin(
         Service_req, User_Service_History.service_req_id == Service_req.id
-    ).join(
+    ).outerjoin(
         Service, Service_req.service_id == Service.id
     ).filter(
         User_Service_History.user_id == user_id
     ).all()
     
-    upcoming_services = Service_req.query.filter_by(cust_id=user_id, status=STATUS_PENDING).all()
+    upcoming_services = Service_req.query.filter_by(cust_id=user_id, status='pending').all()
     service_requests = Service_req.query.filter_by(cust_id=user_id).all()
     services = Service.query.all()  # Get all services
     
@@ -130,6 +151,7 @@ def user_dashboard():
         services=services,
         user_info=user_info  # Pass the user_info variable to the template
     )
+
 
 
 @app.route("/service", methods=["GET","POST"])
@@ -259,9 +281,10 @@ def view_professional_profile(id):
     professional = Prof_Info.query.get(id)
     if professional:
         # Calculate the average rating
-        ratings = Rating.query.filter_by(professional_id=id).all()
+        ratings = Service_req.query.filter_by(prof_id=id).all()
+        ratings = [rating.rating for rating in ratings if rating.rating is not None]
         if ratings:
-            average_rating = sum(rating.rating for rating in ratings) / len(ratings)
+            average_rating = sum(ratings) / len(ratings)
         else:
             average_rating = 0
         return render_template("professional_profile.html", professional=professional, average_rating=average_rating)
@@ -278,6 +301,14 @@ def view_user_profile(id):
 @app.route("/user_remark")
 def user_remark():
     return render_template("user_remark.html")
+@app.route("/user_profile/<int:id>")
+def edit_user_profile(id):
+    user = User_Info.query.get(id)
+    if user:
+        return render_template("user_profile.html", user=user)
+    else:
+        return "User not found", 404
+
 
 @app.route("/logout")
 def logout():
@@ -289,31 +320,68 @@ def close():
 
 @app.route("/prof_dashboard")
 def prof_dashboard():
-    if "user_id" in session and session['role'] == 2:
-    
-
-    # Fetch professional-specific service requests
+    # Check if the user is logged in and is a professional (role = 2)
+    if "user_id" in session and session.get('role') == 2:
         professional_id = session["user_id"]
-        today_services = Service_req.query.filter_by(
-            prof_id=professional_id, status=STATUS_PENDING
+        professional = Prof_Info.query.get(professional_id)
+        
+        if not professional:
+            flash("Professional not found.", "error")
+            return redirect(url_for("signin"))
+
+        # Check if the professional is blocked
+        if professional.prof_status == 'blocked':
+            # Render a message page instead of the dashboard
+            return render_template(
+                "blocked_message.html",
+                message="Your account has been blocked. Please contact support for further assistance."
+            )
+        # Fetch services assigned to the logged-in professional with status 'Pending'
+        today_services = Service_req.query.filter(
+            Service_req.prof_id == professional_id,
+            Service_req.status == STATUS_PENDING
         ).all()
 
-        closed_services = Service_req.query.filter_by(
-            prof_id=professional_id, status=STATUS_CLOSED
+        # Fetch closed services and include customer details
+        closed_services = db.session.query(
+            Service_req.id.label("service_id"),
+            User_Info.full_name.label("customer_name"),
+            User_Info.phone.label("customer_phone"),
+            User_Info.location.label("customer_location"),
+            User_Info.pin_code.label("customer_pin_code"),
+            Service_req.date_of_comp.label("date_of_completion"),
+            Service_req.rating.label("rating"),
+            Service_req.remarks.label("remarks")
+        ).join(User_Info, User_Info.id == Service_req.cust_id).filter(
+            Service_req.prof_id == professional_id,
+            Service_req.status == STATUS_CLOSED
         ).all()
 
-        return render_template("prof_dash.html", today_services=today_services, closed_services=closed_services)
+        print(professional)  # Add a print statement to print the professional object
+
+        # Render the dashboard template with fetched data
+        return render_template(
+            "prof_dash.html",
+            today_services=today_services,
+            closed_services=closed_services,
+            professional=professional
+        )
     else:
-        return render_template('login.html')
+        # Redirect to the login page if not logged in or unauthorized
+        return redirect(url_for("signin"))
 
 
-@app.route("/accept_service/<int:service_id>", methods=["POST"])
+
+@app.route('/accept_service/<int:service_id>', methods=['POST'])
 def accept_service(service_id):
-    service_request = Service_req.query.get(service_id)
-    service_request.status = STATUS_ACCEPTED
-    db.session.commit()
-    flash("Service accepted successfully!")
-    return redirect(url_for("prof_dashboard"))
+    service_req = Service_req.query.get(service_id)
+    if service_req:
+        service_req.status = STATUS_ACCEPTED  # Update status
+        db.session.commit()
+        return redirect(url_for('prof_dashboard'))
+    else:
+        return "Service Request not found", 404
+
 
 @app.route("/reject_service/<int:service_id>", methods=["POST"])
 def reject_service(service_id):
@@ -322,6 +390,72 @@ def reject_service(service_id):
     db.session.commit()
     flash("Service rejected successfully!")
     return redirect(url_for("prof_dashboard"))
+
+# @app.route('/close_service/<int:service_req_id>', methods=['GET','POST'])
+# def close_service(service_req_id):
+#     # Find the service request by ID
+#     service_reqs = Service_req.query.get(service_req_id)
+#     service = Service.query.get(service_req_id)
+#     if request.method == 'GET':
+#         return render_template('user_remarks.html', service_req=service_reqs, service=service)
+#     if request.method == 'POST':
+#         remarks = request.form.get('remarks')
+#         feedback_user = request.form.get('feedback_user')
+#         request.rating = remarks
+#         request.remarks = feedback_user
+#         request.status = 'closed'
+#         db.session.commit()
+#         return redirect(url_for('user_dashboard'))
+    # if service_reqs and service_reqs.status == 'closed':
+    #     customers = User_Info.query.filter_by(id=service_reqs.cust_id).first()
+    #     return render_template('prof_dashboard.html', customers=customers, service_reqs=service_reqs)
+        # if customers:
+        #     customer_info = {
+        #         'name': customer.full_name,
+        #         'phone': customer.phone,
+        #         'location': f"{customer.location} ({customer.pin_code})",
+        #         'date_of_comp': service_req.date_of_comp.strftime('%Y-%m-%d'),
+        #         'rating': service_req.rating
+        #     }
+        #     return render_template('prof_dashboard.html', customer_info=customer_info)
+    
+    # return redirect(url_for("prof_dashboard"), service_req_id=service_req_id, service=service)
+@app.route('/close_service/<int:service_req_id>', methods=['GET', 'POST'])
+def close_service(service_req_id):
+    # Fetch the service request
+    service_req = Service_req.query.get(service_req_id)
+    
+    # Check if the service request exists and has been accepted
+    if not service_req or service_req.status.lower() != 'accepted':
+        flash("Invalid request or service not accepted.", "danger")
+        return redirect(url_for('user_dashboard'))
+    
+    if request.method == 'POST':
+        # Handle form submission
+        rating = request.form.get('rating')
+        feedback = request.form.get('feedback_user')
+
+        # Ensure a rating is selected (if necessary)
+        if not rating:
+            flash("Please provide a rating before closing the service.", "warning")
+            return redirect(url_for('close_service', service_req_id=service_req_id))
+
+        # Update the service request status, rating, and feedback
+        service_req.status = 'closed'
+        service_req.remarks = feedback
+        service_req.rating = int(rating) if rating else None
+        service_req.date_of_comp = datetime.utcnow()
+
+        db.session.commit()
+        flash("Service request successfully closed with your feedback.", "success")
+        return redirect(url_for('user_dashboard'))
+    
+    # Handle GET request (render the remarks page)
+    service = Service.query.get(service_req.service_id)
+    return render_template('user_remarks.html', service_req=service_req, service=service)
+
+
+
 
 @app.route("/cancel_service/<int:service_id>", methods=["POST"])
 def cancel_service(service_id):
@@ -342,7 +476,7 @@ def list_professionals(name):
         return redirect(url_for('user_dashboard'))
 
     # Filter professionals based on the service_id
-    filtered_professionals = Prof_Info.query.filter_by(service_name=service.id).all()
+    filtered_professionals = Prof_Info.query.filter_by(service_name=service.id).filter(Prof_Info.prof_status != 'blocked').all()
     user_service_history = User_Service_History.query.all()
     return render_template('professional_list.html', name=name, professionals=filtered_professionals, user_service_history=user_service_history, service=service)
 
@@ -351,68 +485,385 @@ def book_professional(professional_id):
     service_id = request.form["service_id"]
     customer_id = session["user_id"]
     professional = Prof_Info.query.get(professional_id)
+    if professional.prof_status == 'blocked':
+        flash("This professional is not available for booking.", "error")
+        return redirect(url_for("user_dashboard"))
     service = Service.query.get(service_id)
-    
-    # Create a new Service_req record
-    service_request = Service_req(
-        service_id=service_id,
-        cust_id=customer_id,
-        prof_id=professional.id,
-        date_of_req=datetime.now(),
-        status=STATUS_PENDING
-    )
-    
-    # Add the service request to the database
-    db.session.add(service_request)
+    service_request = Service_req( service_id=service_id, cust_id=customer_id, prof_id=professional.id, date_of_req=datetime.now(), status=STATUS_PENDING )
+    db.session.add(service_request) 
     db.session.commit()
-    
-    # Now link the service request to the user's service history
-    user_service_history = User_Service_History(
-        user_id=customer_id,
-        service_req_id=service_request.id
-    )
-    db.session.add(user_service_history)
-    db.session.commit()
-    
-    flash("Service booked successfully!")
+    user_service_history = User_Service_History( user_id=customer_id, service_req_id=service_request.id ) 
+    db.session.add(user_service_history) 
+    db.session.commit() 
+    flash("Service booked successfully!") 
     return redirect(url_for("user_dashboard"))
-
-
-
-@app.route('/close_service/<int:service_req_id>', methods=['GET'])
-def close_service(service_req_id):
-    # Find the service request by ID
-    service_req = Service_req.query.get(service_req_id)
-    if service_req and service_req.status in ["Pending", "Accepted"]:
-        # Render the user_remarks.html page, passing the service request details
-        return render_template('user_remarks.html', service_req=service_req)
-    else:
-        return "Service not found or cannot be closed", 404
-
-@app.route('/submit_feedback/<int:service_req_id>', methods=['POST'])
-def submit_feedback(service_req_id):
-    # Fetch the service request
-    service_req = Service_req.query.get(service_req_id)
-
-    if not service_req:
-        return "Service request not found", 404
-
-    # Update status to 'Completed'
-    service_req.status = "Completed"
-    service_req.date_of_comp = datetime.now()
+       
+@app.route("/professional_profile", methods=["GET", "POST"])
+def professional_profile():
+    # Check if the user is logged in by checking the session for the user_id
+    professional_id = session.get('user_id')
     
-    # Save the user's rating and remarks
-    service_req.rating = request.form.get('rating')  # This comes from the 'name' attribute in the form
-    service_req.remarks = request.form.get('remarks')  # User's remarks from the textarea
+    if not professional_id:
+        flash("You must be logged in to view your profile.", "danger")
+        return redirect(url_for('signin'))  # Redirect to the login page if not logged in
     
+    # Fetch the professional from the database
+    professional = Prof_Info.query.get(professional_id)
+    
+    if not professional:
+        flash("Profile not found.", "danger")
+        return redirect(url_for('prof_dashboard'))  # Redirect to dashboard if professional not found
 
-    db.session.commit()
-    return redirect(url_for('user_dashboard'))
+    if request.method == "POST":
+        # Handle profile update form submission
+        full_name = request.form.get("full_name")
+        phone = request.form.get("phone")
+        email = request.form.get("email")
+        location = request.form.get("location")
+        pin_code = request.form.get("pin_code")
+        
 
-# @app.route("/user/search", methods=["GET", "POST"])
-# def search_professionals():
-#     if request.method == "POST":
-#         service_name = request.form.get("service_name")
-#         professionals = Prof_Info.query.filter_by(service_name=service_name).all()
-#         return render_template("search_results.html", professionals=professionals)
-#     return render_template("user_dash.html")
+        # Update the professional's information
+        professional.full_name = full_name
+        professional.phone = phone
+        professional.email = email
+        professional.location = location
+        professional.pin_code = pin_code
+
+        # Save changes to the database
+        db.session.commit()
+        flash("Your profile has been updated successfully!", "success")
+
+        return redirect(url_for('prof_dashboard'))  # Redirect to the profile page to show updated info
+
+    return render_template("professional_edit.html", professional=professional)
+
+@app.route("/user_profile", methods=["GET", "POST"])
+def user_profile():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        flash("You must be logged in to view your profile.", "danger")
+        return redirect(url_for('signin'))
+
+    user = User_Info.query.get(user_id)
+    user_info = User_Info.query.get(user_id)  # Fetch user_info to pass to the template
+
+    if not user:
+        flash("Profile not found.", "danger")
+        return redirect(url_for('user_dashboard'))
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name")
+        phone = request.form.get("phone")
+        email = request.form.get("email")
+        location = request.form.get("location")
+        pin_code = request.form.get("pin_code")
+
+        user.full_name = full_name
+        user.phone = phone
+        user.email = email
+        user.location = location
+        user.pin_code = pin_code
+
+        db.session.commit()
+        flash("Your profile has been updated successfully!", "success")
+
+        return redirect(url_for('user_dashboard'))
+
+    return render_template("user_edit.html", user=user, user_info=user_info)
+
+
+
+
+
+    # if service_req and service_req.status in ["accepted"]:
+    #     # Get the related service using the foreign key from the service request
+    #     service = Service.query.get(service_req.service_id)  # Assuming `service_id` links to `Service`
+        
+    #     if service:
+    #         # Ensure that customer information is included
+    #         customer = service_req.customer  # Get customer (User_Info) from service request
+    #         if customer:
+    #             # Pass service request, service, and customer to template
+    #             return render_template('user_remarks.html', service_req=service_req, service=service, customer=customer)
+    #         else:
+    #             return "Customer not found", 404
+    #     else:
+    #         return "Service not found", 404
+    # else:
+    #     return "Service request not found or cannot be closed", 404
+
+
+
+# @app.route('/submit_feedback/<int:service_req_id>', methods=['POST'])
+# def submit_feedback(service_req_id):
+#     # Find the service request by ID
+#     service_req = Service_req.query.get(service_req_id)
+    
+#     if service_req and service_req.status in ["accepted"]:
+#         # Update the status to "completed"
+#         service_req.status = "closed"
+#         service_req.date_of_comp = datetime.utcnow()
+
+#         # Collect feedback data from the form
+#         service_req.rating = request.form.get('rating')  # Make sure this field exists in the DB
+#         service_req.remarks = request.form.get('remarks')  # Make sure this field exists in the DB
+
+#         # Commit changes to the database
+#         db.session.commit()
+
+#         # Redirect to the user dashboard after submission
+#         return redirect(url_for('user_dashboard'))
+#     else:
+#         return "Service not found or cannot be updated", 404
+
+@app.route("/user/search/<int:professional_id>", methods=["GET", "POST"])  # for professional search
+def search_professionals(professional_id):
+    search_history = []
+    professional = None
+    user_id = session.get("user_id") 
+    user_info = User_Info.query.get(user_id)
+    if "user_id" in session and session.get('role') == 2:
+        professional_id = session["user_id"]
+        professional = Prof_Info.query.get(professional_id)
+
+    if request.method == "POST":
+        search_by = request.form.get("search_by")
+        search_value = request.form.get("search_value")
+
+        # Ensure the results are scoped to the professional's services
+        base_query = Service_req.query.join(User_Info, Service_req.cust_id == User_Info.id).filter(
+            Service_req.prof_id == professional_id
+        )
+
+        # Search by location or pin code
+        if search_by == 'location':
+            search_history = base_query.filter(
+                (User_Info.location.ilike(f'%{search_value}%')) |
+                (User_Info.pin_code.cast(String).ilike(f'%{search_value}%'))
+            ).all()
+
+        # Search by date (flexible search)
+        elif search_by == 'date':
+            search_history = base_query.filter(
+                Service_req.date_of_req.cast(String).ilike(f'%{search_value}%') |
+                Service_req.date_of_comp.cast(String).ilike(f'%{search_value}%')
+            ).all()
+
+        # Search by customer name
+        elif search_by == 'name':
+            search_history = base_query.filter(
+                User_Info.full_name.ilike(f'%{search_value}%')
+            ).all()
+
+        # Search by pin code
+        elif search_by == 'pin':
+            search_history = base_query.filter(
+                User_Info.pin_code.cast(String).ilike(f'%{search_value}%')
+            ).all()
+
+    return render_template("prof_search.html", search_history=search_history, professional=professional, user_info=user_info)
+
+@app.route("/professional/search", methods=["GET", "POST"])
+def search_users():
+    search_history = []
+    message = None
+
+    user_id = session.get("user_id")
+    user_info = User_Info.query.get(user_id)
+
+    if request.method == "POST":
+        search_by = request.form.get("search_by")
+        search_value = request.form.get("search_value")
+
+        query = db.session.query(
+            Prof_Info,
+            Service.name.label("service_name"),
+            func.avg(Service_req.rating).label("avg_rating")
+        ).join(Service, Prof_Info.service_name == Service.id)\
+         .outerjoin(Service_req, Service_req.prof_id == Prof_Info.id)\
+         .filter(Prof_Info.prof_status == 'approved')
+
+        if search_by == "location":
+            query = query.filter(
+                or_(
+                    Prof_Info.location.ilike(f"%{search_value}%"),
+                    Prof_Info.pin_code.cast(String).ilike(f"%{search_value}%")
+                )
+            )
+        elif search_by == "name":
+            query = query.filter(Prof_Info.full_name.ilike(f"%{search_value}%"))
+        elif search_by == "service":
+            query = query.filter(Service.name.ilike(f"%{search_value}%"))
+        elif search_by == "pin":
+            query = query.filter(Prof_Info.pin_code.cast(String).ilike(f"%{search_value}%"))
+        elif search_by == "phone":
+            query = query.filter(Prof_Info.phone.ilike(f"%{search_value}%"))
+
+        search_history = query.group_by(Prof_Info.id).all()
+
+        if not search_history:
+            message = "No matching results found."
+
+    return render_template(
+        "user_search.html",
+        search_history=search_history,
+        message=message,
+        user_info=user_info  # Ensure user_info is passed
+    )
+
+
+
+@app.route("/professional_summary/<int:professional_id>")
+def professional_summary(professional_id):
+    professional = Prof_Info.query.get(professional_id)
+
+    if not professional:
+        flash("Professional not found.", "error")
+        return redirect(url_for("signin"))
+
+    # Fetch all service requests for the professional
+    service_reqs = Service_req.query.filter_by(prof_id=professional_id).all()
+
+    # Calculate the average rating (handle no ratings gracefully)
+    ratings = [sr.rating for sr in service_reqs if sr.rating is not None]
+    avg_rating = sum(ratings) / len(ratings) if ratings else 0
+
+    # Save the chart to a file
+    plt.figure(figsize=(6, 4))
+    plt.bar(["Rating"], [avg_rating], color='#4CAF50')
+    plt.xlabel("Category")
+    plt.ylabel("Average Rating")
+    plt.title("Average Rating Chart")
+    chart_path = os.path.join('static', f'avg_rating_{professional_id}.png')
+    plt.savefig(chart_path)
+    plt.close()
+
+    # Render the template
+    return render_template(
+        "prof_summary.html",
+        professional=professional,
+        avg_rating=avg_rating,
+        chart_url=url_for('static', filename=f'avg_rating_{professional_id}.png')
+    )
+
+
+
+
+
+
+
+@app.route("/user_summary/<int:user_id>")
+def user_summary(user_id):
+    user = User_Info.query.get(user_id)
+
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for("signin"))
+
+    # Fetch all service requests for the user
+    service_reqs = Service_req.query.filter_by(cust_id=user_id).all()
+
+    # Calculate the number of requests by status
+    status_counts = {
+        'pending': 0,
+        'closed': 0,
+        'accepted': 0
+    }
+
+    for req in service_reqs:
+        if req.status == 'pending':
+            status_counts['pending'] += 1
+        elif req.status == 'closed':
+            status_counts['closed'] += 1
+        elif req.status == 'accepted':
+            status_counts['accepted'] += 1
+
+    # Data for the bar chart
+    labels = list(status_counts.keys())
+    values = list(status_counts.values())
+    colors = ['blue', 'green', 'pink']
+
+    # Create the bar chart
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(labels, values, color=colors)
+
+    # Add labels and title
+    plt.ylabel('Number of Requests')
+    plt.title('Service Requests')
+
+    # Save the plot to a file
+    chart_path = os.path.join('static', f'service_summary_{user_id}.png')
+    plt.savefig(chart_path)
+    plt.close()
+
+    # Render the template
+    return render_template(
+        "user_summary.html",
+        user=user,
+        chart_url=url_for('static', filename=f'service_summary_{user_id}.png')
+    )
+
+
+import matplotlib.pyplot as plt
+import io
+import base64
+
+@app.route('/admin_summary')
+def admin_summary():
+    # Fetch data from the database
+    service_reqs = Service_req.query.all()
+
+    # Calculate the number of requests by status
+    status_counts = {
+        'Requested': 0,
+        'Accepted': 0,
+        'Closed': 0
+    }
+
+    for req in service_reqs:
+        if req.status == 'pending':
+            status_counts['Requested'] += 1
+        elif req.status == 'accepted':
+            status_counts['Accepted'] += 1
+        elif req.status == 'closed':
+            status_counts['Closed'] += 1
+
+    # Calculate the ratings distribution
+    customer_ratings = [req.rating for req in service_reqs if req.rating is not None]
+    rating_counts = [customer_ratings.count(i) for i in range(1, 6)]
+
+    # Create the customer ratings donut chart
+    plt.figure(figsize=(6, 6))
+    plt.pie(rating_counts, labels=range(1, 6), autopct='%1.1f%%', startangle=140, 
+            colors=['#ff9999','#66b3ff','#99ff99','#ffcc99','#ff6666'])
+    plt.title('Overall Customer Ratings')
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Save the plot to a BytesIO object
+    img1 = io.BytesIO()
+    plt.savefig(img1, format='png')
+    img1.seek(0)
+    plot_url1 = base64.b64encode(img1.getvalue()).decode()
+    plt.close()
+
+    # Create the service requests summary bar chart
+    plt.figure(figsize=(10, 6))
+    plt.bar(status_counts.keys(), status_counts.values(), color=['blue', 'green', 'pink'])
+    plt.title('Service Requests Summary')
+    plt.xlabel('Status')
+    plt.ylabel('Number of Requests')
+
+    # Save the plot to a BytesIO object
+    img2 = io.BytesIO()
+    plt.savefig(img2, format='png')
+    img2.seek(0)
+    plot_url2 = base64.b64encode(img2.getvalue()).decode()
+    plt.close()
+
+    return render_template(
+        "admin_summary.html",
+        plot_url1=plot_url1,
+        plot_url2=plot_url2
+    )
