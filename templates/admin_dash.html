@@ -109,7 +109,6 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Service</th>
                     <th>Customer</th>
                     <th>Professional</th>
                     <th>Date Requested</th>
@@ -119,8 +118,7 @@
             <tbody>
                 {% for request in service_requests %}
                 <tr>
-                    <td>{{ request.id }}</td>
-                    <td>{{ request.service.name }}</td>
+                    <td><a href="{{ url_for('service_request_details', id=request.id) }}">{{ request.id }}</a></td>
                     <td>{{ request.customer.full_name }}</td>
                     <td>{{ request.professional.full_name }}</td>
                     <td>{{ request.date_of_req.strftime('%Y-%m-%d') }}</td>
@@ -141,13 +139,15 @@
                 <th>User ID</th>
                 <th>Full Name</th>
                 <th>Email</th>
+                <th>Location</th>
                 <th>Action</th>
             </tr>
             {% for user_info in users %}
             <tr>
                 <td><a href="{{ url_for('view_user_profile', id=user_info.id)}}">{{ user_info.id }}</a></td>
                 <td>{{ user_info.full_name }}</td>
-                <td>{{ user_info.email }}</td>
+                <td>{{ user_info.email }}</td>  
+                <td>{{ user_info.location }}</td>
                 <td class="action-buttons">
                     
                     {% if user_info.user_status == 'approved' %}
@@ -176,6 +176,7 @@
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Service</th>
+                <th>Location</th>
                 <th>Action</th>
             </tr>
             {% for prof_info in professionals %}
@@ -184,6 +185,7 @@
                 <td>{{ prof_info.full_name }}</td>
                 <td>{{ prof_info.email }}</td>
                 <td>{{ prof_info.service.name }}</td>
+                <td>{{ prof_info.location }}</td>
                 <td class="action-buttons">
                     {% if prof_info.prof_status == 'approved' %}
                     <form action="{{url_for('block_professional', id=prof_info.id)}}" method="POST">

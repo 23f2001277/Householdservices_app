@@ -39,7 +39,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Service Name</th>
+                        <!-- <th>Service Name</th> -->
                         <th>Professional Name</th>
                         <th>Phone No.</th>
                         <th>Date of Request</th>
@@ -52,8 +52,8 @@
                     
                     <tr>
                         <td>{{ service_req.id }}</td>
-                        <td>{{ service.name }}</td>
-                        <td>{{ service_req.professional.full_name }}</td>
+                        <!-- <td>{{ service.name }}</td> -->
+                        <td><a href="/professional_profile/{{ service_req.professional.id }}">{{ service_req.professional.full_name }}</a></td>
                         <td>{{ service_req.professional.phone }}</td>
                         <td>{{ service_req.date_of_req.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>

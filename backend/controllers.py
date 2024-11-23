@@ -122,7 +122,7 @@ def admin_dashboard():
     services = Service.query.all()
     professionals = Prof_Info.query.all()
     users = User_Info.query.all()
-    service_requests = Service_req.query.join(Service).all()
+    service_requests = Service_req.query.all()
     return render_template("admin_dash.html", services=services, professionals=professionals, users=users, service_requests=service_requests)
 
 @app.route("/user")
@@ -298,6 +298,18 @@ def view_user_profile(id):
         return render_template("user_profile.html", user=user)
     else:
         return "User not found", 404
+    
+@app.route('/service_request_details/<int:id>')
+def service_request_details(id):
+    service_req = Service_req.query.get(id)
+    if service_req:
+        customer = service_req.customer
+        professional = service_req.professional
+        # service_name = service_req.service.name
+        return render_template('service_req_details.html', service_req=service_req, customer=customer, professional=professional)
+    else:
+        return 'Service request not found', 404
+    
 @app.route("/user_remark")
 def user_remark():
     return render_template("user_remark.html")
@@ -483,7 +495,7 @@ def list_professionals(name):
 
     # Filter professionals based on the service_id
     filtered_professionals = Prof_Info.query.filter_by(service_name=service.id).filter(Prof_Info.prof_status != 'blocked').all()
-    user_service_history = User_Service_History.query.join(Service).filter(User_Service_History.service_id == service.id).all()
+    user_service_history = User_Service_History.query.filter_by(service_req_id=service.id).all()
     return render_template('professional_list.html', name=name, professionals=filtered_professionals, user_service_history=user_service_history, service=service, user_info=user_info)
 
 @app.route("/book/<int:professional_id>", methods=["POST"])
