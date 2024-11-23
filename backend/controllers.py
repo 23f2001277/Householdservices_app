@@ -119,10 +119,10 @@ def signup2():
 
 @app.route("/admin")
 def admin_dashboard():
-    services=Service.query.all()
-    professionals=Prof_Info.query.all()
-    users=User_Info.query.all()
-    service_requests = Service_req.query.all()
+    services = Service.query.all()
+    professionals = Prof_Info.query.all()
+    users = User_Info.query.all()
+    service_requests = Service_req.query.join(Service).all()
     return render_template("admin_dash.html", services=services, professionals=professionals, users=users, service_requests=service_requests)
 
 @app.route("/user")
@@ -432,20 +432,25 @@ def close_service(service_req_id):
     
     if request.method == 'POST':
         # Handle form submission
-        rating = request.form.get('rating')
-        feedback = request.form.get('feedback_user')
-
-        # Ensure a rating is selected (if necessary)
-        if not rating:
-            flash("Please provide a rating before closing the service.", "warning")
+        rating = request.form['rating']
+        feedback = request.form['feedback_user']
+        
+        # Validate rating value
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                flash("Please provide a rating between 1 and 5.", "warning")
+                return redirect(url_for('close_service', service_req_id=service_req_id))
+        except ValueError:
+            flash("Invalid rating value.", "warning")
             return redirect(url_for('close_service', service_req_id=service_req_id))
-
+        
         # Update the service request status, rating, and feedback
         service_req.status = 'closed'
         service_req.remarks = feedback
-        service_req.rating = int(rating) if rating else None
+        service_req.rating = rating
         service_req.date_of_comp = datetime.utcnow()
-
+        
         db.session.commit()
         flash("Service request successfully closed with your feedback.", "success")
         return redirect(url_for('user_dashboard'))
@@ -453,8 +458,6 @@ def close_service(service_req_id):
     # Handle GET request (render the remarks page)
     service = Service.query.get(service_req.service_id)
     return render_template('user_remarks.html', service_req=service_req, service=service)
-
-
 
 
 @app.route("/cancel_service/<int:service_id>", methods=["POST"])
@@ -467,6 +470,9 @@ def cancel_service(service_id):
 
 @app.route('/service/<name>')
 def list_professionals(name):
+    user_id = session["user_id"]
+    user_info = User_Info.query.get(user_id)
+
     # Get the service by name
     service = Service.query.filter_by(name=name).first()
 
@@ -477,8 +483,8 @@ def list_professionals(name):
 
     # Filter professionals based on the service_id
     filtered_professionals = Prof_Info.query.filter_by(service_name=service.id).filter(Prof_Info.prof_status != 'blocked').all()
-    user_service_history = User_Service_History.query.all()
-    return render_template('professional_list.html', name=name, professionals=filtered_professionals, user_service_history=user_service_history, service=service)
+    user_service_history = User_Service_History.query.join(Service).filter(User_Service_History.service_id == service.id).all()
+    return render_template('professional_list.html', name=name, professionals=filtered_professionals, user_service_history=user_service_history, service=service, user_info=user_info)
 
 @app.route("/book/<int:professional_id>", methods=["POST"])
 def book_professional(professional_id):
