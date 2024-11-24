@@ -143,13 +143,16 @@ def user_dashboard():
     service_requests = Service_req.query.filter_by(cust_id=user_id).all()
     services = Service.query.all()  # Get all services
     
+
+    # You can also access the avg_rating here if needed
     return render_template(
         "user_dash.html",
         user_service_history=user_service_history,
         upcoming_services=upcoming_services,
         service_requests=service_requests,
         services=services,
-        user_info=user_info  # Pass the user_info variable to the template
+        user_info=user_info,
+         
     )
 
 
