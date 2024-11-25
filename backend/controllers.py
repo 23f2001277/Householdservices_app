@@ -143,19 +143,24 @@ def user_dashboard():
     service_requests = Service_req.query.filter_by(cust_id=user_id).all()
     services = Service.query.all()  # Get all services
     
-
-    # You can also access the avg_rating here if needed
+    # Get the top-rated professionals
+    top_rated_professionals = db.session.query(
+        Prof_Info,
+        func.avg(Service_req.rating).label("avg_rating")
+    ).join(Service_req, Prof_Info.id == Service_req.prof_id).\
+        group_by(Prof_Info.id).\
+        order_by(func.avg(Service_req.rating).desc()).\
+        limit(5).all()
+    
     return render_template(
         "user_dash.html",
         user_service_history=user_service_history,
         upcoming_services=upcoming_services,
         service_requests=service_requests,
         services=services,
+        top_rated_professionals=top_rated_professionals,
         user_info=user_info,
-         
     )
-
-
 
 @app.route("/service", methods=["GET","POST"])
 def new_service():

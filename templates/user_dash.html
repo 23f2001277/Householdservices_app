@@ -1,40 +1,41 @@
 {% extends "user_layout.html" %}
 {% block content %}
 <html>
-    <p class="trs" style="text-align: center; font-size: 30px;">Top-rated services</p>
+    
     <div class="container">
         <div class="row">
-            <div class="col">
-                <div class="card" style="width: 15rem;">
-                    <img src="/static/images/salon.jpeg" class="card-img-top" alt="salon" height="158px">
-                    <div class="card-body">
-                        <h5 class="card-title">Salon</h5>
-                        <a href="{{ url_for('list_professionals', name='Salon') }}" class="btn btn-primary">Check out packages</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card" style="width: 15rem;">
-                    <img src="/static/images/pest.jpeg" class="card-img-top" alt="pest" height="158px">
-                    <div class="card-body">
-                        <h5 class="card-title">Pest Control</h5>
-                        <a href="{{ url_for('list_professionals', name='Pest Control') }}" class="btn btn-primary">Check out packages</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card" style="width: 15rem;">
-                    <img src="/static/images/acr.jpeg" class="card-img-top" alt="acrepair">
-                    <div class="card-body">
-                        <h5 class="card-title">AC Repair</h5>
-                        <a href="{{ url_for('list_professionals', name='AC Repair') }}" class="btn btn-primary">Check out packages</a>
-                    </div>
-                </div>
-            </div>
         </div>
-
-
-
+        <div class="container mt-5">
+            <h2 style="text-align: center;">Top-Rated Professionals</h2>
+            <table class="table table-bordered table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Professional Name</th>
+                        <th>Service</th>
+                        <th>Location</th>
+                        <th>Average Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for professional, avg_rating in top_rated_professionals %}
+                    <tr>
+                        <td><a href="/professional_profile/{{ professional.id }}">{{ professional.full_name }}</a></td>
+                        <td>{{ professional.service.name }}</td>
+                        <td>{{ professional.location }}</td>
+                        <td>{{ avg_rating }}</td>
+                        <td>
+                            <form action="{{ url_for('book_professional', professional_id=professional.id) }}" method="post">
+                                <input type="hidden" name="service_id" value="{{ professional.service_name }}">
+                                <button type="submit" class="btn btn-primary">Book Now</button>
+                            </form>
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <div class="container mt-5">
             <h2 style="text-align: center;">Service History</h2>
             <table class="table table-bordered table-striped mt-3">
