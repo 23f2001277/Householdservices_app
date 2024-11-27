@@ -23,7 +23,7 @@
                         <td><a href="/professional_profile/{{ professional.id }}">{{ professional.full_name }}</a></td>
                         <td>{{ professional.service.name }}</td>
                         <td>{{ professional.location }}</td>
-                        <td>{{ avg_rating| round(2) }}</td>
+                        <td>{{ avg_rating }}</td>
                         <td>
                             <form action="{{ url_for('book_professional', professional_id=professional.id) }}" method="post">
                                 <input type="hidden" name="service_id" value="{{ professional.service_name }}">

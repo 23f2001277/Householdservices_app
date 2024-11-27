@@ -64,10 +64,3 @@ class User_Service_History(db.Model):
     service_req_id = db.Column(db.Integer, db.ForeignKey('service_req.id'))
     user = db.relationship('User_Info', backref=db.backref('user_service_history', lazy=True))
     service_req = db.relationship('Service_req', backref=db.backref('user_service_history', lazy=True))
-
-
-# class Rating(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     rating = db.Column(db.Integer, nullable=False)
-#     professional_id = db.Column(db.Integer, db.ForeignKey('prof_info.id'), nullable=False)
-    

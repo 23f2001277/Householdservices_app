@@ -91,8 +91,7 @@
         
         <form action="{{ url_for('close_service', service_req_id=service_req.id) }}" method="POST" onsubmit="return validateForm()">
             <!-- Read-only fields dynamically filled by server -->
-            <input type="text" class="input-field" value="{{ service.name }}" readonly>
-            <input type="text" class="input-field" value="{{ service.desc }}" readonly>
+           
             <input type="text" class="input-field" value="{{ service_req.date_of_req.strftime('%d/%m/%Y') }}" readonly>
             <input type="text" class="input-field" value="{{ service_req.professional.full_name }}" readonly>
             <input type="text" class="input-field" value="{{ service_req.professional.phone }}" readonly>
