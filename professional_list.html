@@ -1,0 +1,36 @@
+{% extends "user_layout.html" %}
+{% block content %}
+<html>
+    <h2 style="text-align: center;">Professionals for {{ name }}</h2>
+    <div class="container">
+        <table class="table table-bordered table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for professional in professionals %}
+                <tr>
+                    <td>{{ professional.id }}</td>
+                    <td>{{ professional.full_name }}</td>
+                    <td>{{ professional.phone }}</td>
+                    <td>{{ professional.email }}</td>
+                    <td>
+                        <form action="{{ url_for('book_professional', professional_id=professional.id) }}" method="post">
+                            <input type="hidden" name="service_id" value="{{ service.id }}">
+                            <button type="submit">Book</button>
+                        </form>
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</html>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends "user_layout.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f5d0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #87ceeb;
+            padding: 10px;
+            text-align: right;
+        }
+        .header a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+        }
+        .header a#logout {
+            color: red;
+        }
+        .title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: red;
+            font-weight: bold;
+        }
+        .container {
+            padding: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #ff8c00;
+        }
+        .search-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .search-container label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .search-container select, .search-container input[type="text"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .search-container button {
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .package-list {
+            margin-top: 20px;
+            border: 2px solid #87ceeb;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .package-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .package-list th, .package-list td {
+            padding: 10px;
+            text-align: left;
+        }
+        .package-list th {
+            font-weight: bold;
+            color: #008080;
+            background-color: #f0f8ff;
+        }
+        .package-list td {
+            border-top: 1px solid #ccc;
+        }
+        .package-list td.action {
+            text-align: center;
+        }
+        .book-button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .no-results {
+            color: red;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Search Form -->
+        <div class="search-container">
+            <form method="POST" action="/professional/search">
+                <label for="search-by">Search by :</label>
+                <select id="search_for" name="search_by" required>
+                    <option value="service">Service Name</option>
+                    <option value="name">Professional Name</option>
+                    <option value="location">Location</option>
+                    <option value="pin">Pin Code</option>
+                </select>
+                <input type="text" name="search_value" placeholder="Enter search value" required>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Search Results -->
+        <div class="section-title">Search Results</div>
+        {% if search_history %}
+        <div class="package-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Professional Name</th>
+                        <th>Service Name</th>
+                        <th>Location</th>
+                        <th>Average Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in search_history %}
+                    <tr>
+                        <td>{{ result.Prof_Info.full_name }}</td>
+                        <td>{{ result.service_name }}</td>
+                        <td>{{ result.Prof_Info.location }}</td>
+                        <td>{{ result.avg_rating | round(2) if result.avg_rating else "No Rating" }}</td>
+                        <td>
+                            <!-- Book Now Button -->
+                            <form action="{{ url_for('book_professional', professional_id=result.Prof_Info.id) }}" method="post">
+                                <input type="hidden" name="service_id" value="{{ result.service_name.id }}">
+                                <button type="submit" class="book-button">Book Now</button>
+                            </form>
+                            
+                            
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-results">No matching results found.</div>
+        {% endif %}
+    </div>
+</body>
+
+</html>
+{% endblock %}

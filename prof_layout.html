@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomEase Professional</title>
+    <link rel="stylesheet" href="/static/styles/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f5d0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #87ceeb;
+            padding: 10px;
+            text-align: right;
+        }
+        .header a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+        }
+        .header a#logout {
+            color: red;
+        }
+        .title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="title">Welcome {{professional_name}}!</span>
+        <a href="{{ url_for('professional_profile')}}">My Profile</a> |
+        <a href="{{ url_for('prof_dashboard') }}">Home</a> |
+        <a href="{{ url_for('search_professionals', professional_id=professional.id) }}">Search</a> |
+        <a href="{{ url_for('professional_summary', professional_id=professional.id)}}">Summary</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+    {%block content%}
+    <!-- dynamic content -->
+     {%endblock%}
+</body>

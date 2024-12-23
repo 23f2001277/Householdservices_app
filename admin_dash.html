@@ -1,0 +1,215 @@
+{% extends "admin_layout.html" %}
+{% block content %}
+    <style>
+        .container {
+            padding: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .table th, .table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        .table th {
+            background-color: #d3f4d7;
+            font-weight: bold;
+        }
+        .action-buttons button {
+            padding: 5px 10px;
+            margin: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-edit {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-approve {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-reject, .btn-block {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-add {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %} -->
+        <a href="/service" type="button">
+            <button type="submit" class="btn-add">+ Add New Service</button>
+        </a>
+
+        <div class="section-title">Services</div>
+        {% if services %}
+        <table class="table">
+             <tr>
+                <th>ID</th>
+                <th>Service Name</th>
+                <th>Base Price (In Rupees)</th>
+                <th>Description</th>
+                <th>Action</th>
+             </tr>
+             {% for service in services %}
+             <tr>
+                <td>{{ service.id }}</td>
+                <td>{{ service.name }}</td>
+                <td>{{ service.baseprice }}</td>
+                <td>{{ service.desc }}</td>
+                <td class="action-buttons">
+                    <a href="/edit_service/{{service.id}}" type="button"><button class="btn-edit">Edit</button></a>
+                    <form action="{{ url_for('delete_service', id=service.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure you want to delete this service?');">Delete</button>
+                    </form>
+                </td>
+             </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <h3 class="center" style="text-align: center;">No services are available</h3>
+        {% endif %}
+
+        <div class="section-title">Service Requests</div>
+        {% if service_requests %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Professional</th>
+                    <th>Date Requested</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in service_requests %}
+                <tr>
+                    <td><a href="{{ url_for('service_request_details', id=request.id) }}">{{ request.id }}</a></td>
+                    <td>{{ request.customer.full_name }}</td>
+                    <td>{{ request.professional.full_name }}</td>
+                    <td>{{ request.date_of_req.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ request.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <h3 class="center" style="text-align: center;">No service requests have been made till now</h3>
+        {% endif %}
+
+        <!-- Manage Users Table -->
+        <div class="section-title">Manage Users</div>
+        {% if users %}
+        <table class="table">
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+            {% for user_info in users %}
+            <tr>
+                <td><a href="{{ url_for('view_user_profile', id=user_info.id)}}">{{ user_info.id }}</a></td>
+                <td>{{ user_info.full_name }}</td>
+                <td>{{ user_info.email }}</td>  
+                <td>{{ user_info.location }}</td>
+                <td class="action-buttons">
+                    
+                    {% if user_info.user_status == 'approved' %}
+                    <form action="{{url_for('block_user', id=user_info.id)}}" method="POST"> 
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to block this user?');">Block</button>
+                    </form>
+                    {% elif user_info.user_status == 'blocked' %}
+                    <form action="{{url_for('unblock_user', id=user_info.id)}}" method="POST"> 
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to unblock this user?');">Unblock</button>
+                    </form>
+                     {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <h3 class="center" style="text-align: center;">No users are available</h3>
+        {% endif %}
+
+        <!-- Manage Professionals Table -->
+        <div class="section-title">Manage Professionals</div>
+        {% if professionals %}
+        <table class="table">
+            <tr>
+                <th>Professional ID</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Service</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+            {% for prof_info in professionals %}
+            <tr>
+                <td><a href="/professional_profile/{{prof_info.id}}">{{ prof_info.id }}</a></td>
+                <td>{{ prof_info.full_name }}</td>
+                <td>{{ prof_info.email }}</td>
+                <td>{{ prof_info.service.name }}</td>
+                <td>{{ prof_info.location }}</td>
+                <td class="action-buttons">
+                    {% if prof_info.prof_status == 'approved' %}
+                    <form action="{{url_for('block_professional', id=prof_info.id)}}" method="POST">
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to block this professional?');">Block</button>
+                        <!-- <form action="{{url_for('delete_professional', id=prof_info.id)}}" method="POST"><button class="btn-delete">Delete</button></form> -->
+                    </form>
+                    {% elif prof_info.prof_status == 'blocked' %}
+                    <form action="{{url_for('unblock_professional', id=prof_info.id)}}" method="POST">
+                        <button class="btn-block" onclick="return confirm('Are you sure you want to unblock this professional?');">Unblock</button>
+                        <!-- <form action="{{url_for('delete_professional', id=prof_info.id)}}" method="POST"><button class="btn-delete">Delete</button></form> -->
+                    {% elif prof_info.prof_status == 'requested' %}
+                    
+                        <form action="{{url_for('approve_professional', id=prof_info.id)}}" method="POST"><button class="btn-approve">Approve</button></form>
+                        <form action="{{url_for('delete_professional', id=prof_info.id)}}" method="POST"><button class="btn-delete">Delete</button></form>
+                    
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <h3 class="center" style="text-align: center;">No professionals are available</h3>
+        {% endif %}
+    </div>
+</body>
+</html>
+{% endblock %}
